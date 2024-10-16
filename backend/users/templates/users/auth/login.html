@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="keywords" content="username, password, login, authentication, django, python, web development">
+    <meta name="description" content="A simple login form using Django, a high-level Python web framework. Users can enter their username and password to authenticate and access the website.">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {% if error %}
+        <p>{{ error }}</p>
+    {% endif %}
+
+    <form class="form" action="" method="post">
+        {% csrf_token %}
+        <input type="text" name="username" placeholder="Enter your name" required>
+        <input type="password" name="password" placeholder="Enter your password" required>
+        <input type="hidden" name="next" value="{{ next_url }}">
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
