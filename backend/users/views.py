@@ -3,6 +3,7 @@ from django.contrib.auth.views import LoginView
 from django.views.generic import TemplateView
 from django.contrib.auth import login, authenticate, logout
 from django.urls import reverse_lazy
+from django.contrib.auth.views import PasswordChangeView
 
 
 class UserLoginView(LoginView):
@@ -48,3 +49,12 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return redirect('login')
+
+
+class CustomPasswordChangeView(PasswordChangeView):
+    success_url = reverse_lazy('password_change_done')
+
+    def form_valid(self, form):
+        self.request.user.force_change_password = False
+        self.request.user.save()
+        return super().form_valid(form)
