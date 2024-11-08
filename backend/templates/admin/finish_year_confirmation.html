@@ -1,0 +1,12 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<h2>Finish Current Academic Year</h2>
+<p>Finishing the current academic year will set:</p>
+<ul>
+    <li><strong>Current year:</strong> {{ current_year.start_year }} - {{ current_year.end_year }} as "Finished"</li>
+    <li><strong>Upcoming year:</strong> {{ upcoming_year.start_year }} - {{ upcoming_year.end_year }} as the new "Current" year</li>
+    <li>A new upcoming year will be created automatically.</li>
+</ul>
+
+{% endblock %}

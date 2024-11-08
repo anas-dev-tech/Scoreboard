@@ -1,0 +1,17 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+  <h1>Import Students</h1>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div>
+      {{ form.group.label_tag }} {{ form.group }}
+    </div>
+    <br>
+    <div>
+      {{ form.file.label_tag }} {{ form.file }}
+    </div>
+    <br>
+    <button type="submit" class="button">Import</button>
+  </form>
+{% endblock %}

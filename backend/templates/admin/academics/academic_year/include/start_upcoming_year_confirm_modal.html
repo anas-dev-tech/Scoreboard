@@ -1,0 +1,49 @@
+
+
+<!-- Modal HTML -->
+<div id="customModal" class="modal" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modal Header</h5>
+                <span class="close" id="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>This is the modal body with some content.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button" id="close-footer-button">Close</button>
+                <form action="{% url 'admin:finish_current_year' %}">
+                    <button class="modal-button modal-button-primary">Save changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = document.getElementById('customModal');
+        const openBtn = document.getElementById('open-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const closeFooterBtn = document.getElementById('close-footer-button');
+
+        openBtn.onclick = function () {
+            modal.style.display = 'block';
+        };
+
+        closeModalBtn.onclick = function () {
+            modal.style.display = 'none';
+        };
+
+        closeFooterBtn.onclick = function () {
+            modal.style.display = 'none';
+        };
+
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        };
+    });
+</script>

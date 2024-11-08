@@ -18,19 +18,22 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# AUTHENTICATION_BACKENDS = ['core.backends.EmailBackend'] #updated
 
 # Application definition
 
 INSTALLED_APPS = [
     # third party apps
-    'taggit',
     
     
     # my apps
     'users',
     'quiz',
-    'common',
+    'academics',
+    'core',
     
+    # third-party apps
+    'jazzmin',
     
     # default apps    
     'django.contrib.admin',
@@ -123,6 +126,7 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -135,3 +139,4 @@ LOGOUT_REDIRECT_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
 
 LOGIN_URL = 'login'
+

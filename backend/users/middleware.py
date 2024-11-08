@@ -12,5 +12,3 @@ class ForcePasswordChangeMiddleware:
                 return redirect('password_change')
 
         return self.get_response(request)
-
-# pbkdf2_sha256$870000$zhREnfaAzAEdhKHHN50Qox$AET4ilnnPsoawdvcMni2c7JBYGkpuRKwnit+Epj+vBw=

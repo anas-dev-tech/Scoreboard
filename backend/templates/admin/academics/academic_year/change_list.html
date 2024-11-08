@@ -1,0 +1,32 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+
+{% block extrahead %}
+{{ block.super }}
+
+    <link rel="stylesheet" href="{% static '/css/admin/modal.css' %}">
+
+{% endblock extrahead %}
+    
+
+
+
+
+
+{% block object-tools %}
+{{ block.super }}
+
+
+<!-- Button trigger modal -->
+<button id="open-modal" class="modal-button">Start a new academic year</button>
+
+{% endblock %}
+
+
+{% block content %}
+{{block.super}}
+
+    {% include 'admin/academics/academic_year/include/start_upcoming_year_confirm_modal.html' %}
+
+{% endblock content %}

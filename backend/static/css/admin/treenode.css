@@ -1,0 +1,30 @@
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+ul.dropdown {
+    margin-left: 20px;
+}
+
+li {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.parent-checkbox {
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.dropdown-label {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.child-checkbox {
+    margin-right: 5px;
+    cursor: pointer;
+}

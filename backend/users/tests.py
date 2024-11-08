@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.core import mail
+from icecream import ic
 
 
 User = get_user_model()
@@ -9,11 +10,18 @@ User = get_user_model()
 
 class PasswordChangeTest(TestCase):
     def setUp(self):
+        # Create user with email login
         self.user = User.objects.create_user(
-            email='testuser@example.com', 
+            first_name='Test',
+            last_name='User',
+            email='testuser@example.com',
             password='testpass123'
         )
-        self.client.login(email=self.user.email, password='testpass123')
+        
+        # Attempt login to confirm user setup
+        ic(self.user)
+        login_success = self.client.login(email=self.user.email, password='testpass123')
+        self.assertTrue(login_success, "Initial login failed in setUp")
 
     def test_password_change(self):
         # Access password change form
@@ -31,7 +39,8 @@ class PasswordChangeTest(TestCase):
         # Test that the new password works
         self.client.logout()
         login_success = self.client.login(email=self.user.email, password='newpass123')
-        self.assertTrue(login_success)
+        self.assertTrue(login_success, "Login with new password failed")
+
 
 class ForcePasswordChangeTest(TestCase):
     def setUp(self):
@@ -45,6 +54,7 @@ class ForcePasswordChangeTest(TestCase):
     def test_force_password_change(self):
         # Ensure the user is redirected to the password change page
         response = self.client.get(reverse('home'))
+        ic(response)
         self.assertRedirects(response, reverse('password_change'))
 
         # Submit the new password

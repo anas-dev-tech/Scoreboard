@@ -1,26 +1,98 @@
 from django.db import models
-from taggit.managers import TaggableManager
-from common.models import CategorizedTaggedItem
+from django.core.exceptions import ValidationError
+from academics.models import Syllabus
+from core.constants import QuizStatus
+from .quiz_session import QuizSession
+from icecream import ic
 
 
+class QuizQuerySet(models.QuerySet):
+    def create_quizzes_for_syllabuses(self, syllabus_ids):
+        # Fetch selected syllabuses
+        syllabuses = Syllabus.objects.filter(id__in=syllabus_ids)
+        quizzes = []
+        
+        for syllabus in syllabuses:
+            # Check if the syllabus allows adding more quizzes
+            if not syllabus.can_add_quiz():
+                raise ValidationError(f"Cannot add more quizzes for syllabus: {syllabus}")
+            
+            # Create the quiz with syllabus details and nullify the student group
+            quiz = self.create(
+                title=f"Quiz for {syllabus.course.name} - {syllabus.student_group or 'General'}",
+                time=90,
+                number_of_questions=10,
+                required_score_to_pass=50,
+                is_randomized=False,
+                easy_questions_count=0,
+                medium_questions_count=0,
+                hard_questions_count=0,
+                quiz_session=None,
+                status=QuizStatus.DRAFT,
+            )
+            quiz.quiz_for.add(syllabus)  # Add syllabus to ManyToManyField
+            quizzes.append(quiz)
+        
+        return quizzes  # Return list of created quizzes
+    
+    def publish_quizzes(self, quiz_ids):
+        # Fetch selected quizzes
+        quizzes = self.filter(id__in=quiz_ids)
+        published_quizzes = []
+        
+        for quiz in quizzes:
+            # Check if the quiz can be published
+            if not quiz.can_publish():
+                raise ValidationError(f"Cannot publish quiz: {quiz}")
+            
+            # Publish the quiz
+            quiz.status = QuizStatus.PUBLISHED
+            quiz.save()
+            published_quizzes.append(quiz)
 
 class Quiz(models.Model):
-    name = models.CharField(max_length=120)
-    time = models.IntegerField(help_text="duration of the quiz in minutes")
-    number_of_questions = models.IntegerField()
-    required_score_to_pass = models.IntegerField(help_text="required score in %")
-    teachers_in_charge = models.ManyToManyField('users.Teacher', related_name='quizzes_in_charge')
-    # Field to indicate if the quiz is randomized for each student
+    title = models.CharField(max_length=120, blank=True)
+    time = models.IntegerField(default=90)
+    number_of_questions = models.IntegerField(default=20, blank=True)
+    required_score_to_pass = models.IntegerField(default=50)
+    quiz_for = models.ManyToManyField(Syllabus, related_name='quizzes_for_this_syllabus', through='QuizSyllabus')
     is_randomized = models.BooleanField(default=False)
-
-    # Fields for specifying the number of questions, only relevant if the quiz is randomized
-    easy_questions_count = models.IntegerField(default=0)
-    medium_questions_count = models.IntegerField(default=0)
-    hard_questions_count = models.IntegerField(default=0)
-    tags = TaggableManager(through=CategorizedTaggedItem, verbose_name="Tags", help_text="Add tags for categories like subject, grade, etc.")
+    easy_questions_count = models.IntegerField(default=0, blank=True, null=True)
+    medium_questions_count = models.IntegerField(default=0, blank=True, null=True)
+    hard_questions_count = models.IntegerField(default=0, blank=True, null=True)
+    quiz_session = models.ForeignKey(QuizSession, on_delete=models.CASCADE, related_name='quizzes', null=True, blank=True)
+    status = models.SmallIntegerField(choices=QuizStatus.choices, default=QuizStatus.DRAFT)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    objects = QuizQuerySet.as_manager()
 
+    def clean(self):
+        # Validate question count consistency
+        if self.number_of_questions != self.easy_questions_count + self.medium_questions_count + self.hard_questions_count:
+            raise ValidationError("Sum of easy, medium, and hard questions must equal the total number of questions.")
+
+        # Ensure quiz assignment to the current academic year syllabus
+        if not self.quiz_for.filter(academic_year__is_current=True).exists():
+            raise ValidationError("Quiz must be associated with a syllabus from the current academic year.")
+    def can_publish(self):
+        # Check if the quiz can be published
+        return self.status == QuizStatus.DRAFT and self.quiz_for.exists()
     
     def __str__(self):
-        return self.name
+        return self.title or "Untitled Quiz"
+
+
+class QuizSyllabus(models.Model):
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='quiz_syllabuses')
+    syllabus = models.ForeignKey(Syllabus, on_delete=models.CASCADE, related_name='syllabus_quizzes')
+    quiz_number = models.IntegerField(default=1)
+
+    def save(self, *args, **kwargs):
+        last_quiz_number = QuizSyllabus.objects.filter(syllabus=self.syllabus).count()
+        self.quiz_number = ic(last_quiz_number + 1)
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        if not self.syllabus.can_add_quiz():
+            raise ValidationError("Cannot add more quizzes for this syllabus.")
