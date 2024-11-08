@@ -10,8 +10,7 @@ from ..forms import SyllabusForm, QuestionForm
 
 class QuizSyllabusInline(admin.TabularInline): 
     model = QuizSyllabus 
-    fields = ['syllabus','quiz_number']
-    readonly_fields = ['quiz_number']
+    fields = ['syllabus']
     extra = 1
 
 
@@ -23,7 +22,7 @@ class QuizAdmin(admin.ModelAdmin):
     """Admin View for Quiz"""
 
     list_display = ("title", "time", 'status')
-    list_filter = ("quiz_for__course", 'status', 'quiz_for__student_group')
+    list_filter = ("quiz_for__course", 'status', 'quiz_for__student_group', 'quiz_for__teacher')
     inlines = [
         QuizSyllabusInline,
         # QuestionInline,

@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from academics.models import Syllabus
-from core.constants import QuizStatus
+from core.constants import QuizStatus, AcademicYearStatus
 from .quiz_session import QuizSession
 from icecream import ic
 
@@ -49,6 +49,14 @@ class QuizQuerySet(models.QuerySet):
             quiz.status = QuizStatus.PUBLISHED
             quiz.save()
             published_quizzes.append(quiz)
+    def get_quizzes_for_teacher(self, teacher_id):
+        syllabuses = Syllabus.objects.filter(teacher__id=teacher_id)
+        ic(syllabuses)
+        
+        teacher_quizzes = self.filter(quiz_for__in=syllabuses)
+        return teacher_quizzes
+
+
 
 class Quiz(models.Model):
     title = models.CharField(max_length=120, blank=True)
@@ -67,13 +75,17 @@ class Quiz(models.Model):
     
     objects = QuizQuerySet.as_manager()
 
+    class Meta:
+        verbose_name = "Quiz"
+        verbose_name_plural = "Quizzes"
+    
     def clean(self):
         # Validate question count consistency
         if self.number_of_questions != self.easy_questions_count + self.medium_questions_count + self.hard_questions_count:
             raise ValidationError("Sum of easy, medium, and hard questions must equal the total number of questions.")
 
         # Ensure quiz assignment to the current academic year syllabus
-        if not self.quiz_for.filter(academic_year__is_current=True).exists():
+        if not self.quiz_for.filter(academic_year__status=AcademicYearStatus.CURRENT).exists():
             raise ValidationError("Quiz must be associated with a syllabus from the current academic year.")
     def can_publish(self):
         # Check if the quiz can be published
@@ -86,12 +98,7 @@ class Quiz(models.Model):
 class QuizSyllabus(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='quiz_syllabuses')
     syllabus = models.ForeignKey(Syllabus, on_delete=models.CASCADE, related_name='syllabus_quizzes')
-    quiz_number = models.IntegerField(default=1)
 
-    def save(self, *args, **kwargs):
-        last_quiz_number = QuizSyllabus.objects.filter(syllabus=self.syllabus).count()
-        self.quiz_number = ic(last_quiz_number + 1)
-        super().save(*args, **kwargs)
 
     def clean(self):
         if not self.syllabus.can_add_quiz():

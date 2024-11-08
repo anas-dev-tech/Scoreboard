@@ -66,7 +66,11 @@ class YearLevelFilter(admin.SimpleListFilter):
 @admin.register(Syllabus)
 class SyllabusAdmin(admin.ModelAdmin):
     """Admin View for Syllabus"""
-
+    exclude = [
+        "created_at",
+        "updated_at",
+        'deleted_at'
+    ]
     list_display = (
         "student_group",
         "course",
@@ -101,7 +105,7 @@ class SyllabusAdmin(admin.ModelAdmin):
     def duplicate_syllabus_for_new_year(self, request, queryset):
 
         for syllabus in queryset:
-            Syllabus.objects.copy_syllabus_to_current_year(syllabus.id)
+            Syllabus.objects.copy_syllabus_to_upcoming_year(syllabus.id)
 
         self.message_user(request, "Syllabus duplicated for the new year.")
         return HttpResponseRedirect(request.get_full_path())

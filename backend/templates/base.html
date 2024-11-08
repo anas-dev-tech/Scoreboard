@@ -19,13 +19,11 @@
             {% include "include/sidebar.html" %}
 
             <main class="app-main">
-
+                {% block content %}
+                {% endblock content %}
             </main>
         </div>
 
-        
-        {% block content %}
-        {% endblock content %}
         {% include "include/head_scripts.html" %}
 
         <script>

@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views.generic import ListView
 from .models import Quiz
-
+from django.contrib.auth.mixins import LoginRequiredMixin
 class TeacherUserMixin:
     def get_teacher(self):
         user = self.request.user
@@ -16,12 +16,12 @@ class QuizTeacherMixin(TeacherUserMixin):
         
         if teacher:
             queryset = super().get_queryset()
-            return queryset.get_quiz_for_teacher(teacher)
+            return queryset.get_quizzes_for_teacher(teacher.id)
         
         return self.model.objects.none()
 
 
-class QuizTeacherListView(QuizTeacherMixin, ListView):
+class QuizTeacherListView(LoginRequiredMixin, QuizTeacherMixin, ListView):
     model = Quiz
     template_name = 'quiz/teacher/list.html'
     context_object_name = 'quizzes'

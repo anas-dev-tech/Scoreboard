@@ -23,12 +23,14 @@ class SyllabusQuerySet(models.QuerySet):
     def hard_delete(self):
         """Permanently delete all items in the queryset."""
         return super().delete()
+    def current(self):
+        return self.filter(academic_year=AcademicYear.objects.get_current_year())
 
 class SyllabusManager(models.Manager):
     def get_queryset(self):
-        return SyllabusQuerySet(self.model, using=self._db).active()
+        return SyllabusQuerySet(self.model, using=self._db).active().current()
 
-    def copy_syllabus_to_current_year(self, syllabus_id):
+    def copy_syllabus_to_upcoming_year(self, syllabus_id):
         """
         Copy a syllabus to the current academic year with `student_group` set to None.
         """
@@ -36,14 +38,14 @@ class SyllabusManager(models.Manager):
         if not syllabus:
             raise ValidationError("Syllabus not found or has been deleted.")
 
-        current_year = AcademicYear.objects.get_current_year()
+        upcoming_year = AcademicYear.objects.get_upcoming_year()
         
         new_syllabus = Syllabus.objects.create(
-            student_group=None,  # Set student_group to None
+            student_group=syllabus.student_group,  # Set student_group to None
             course=syllabus.course,
             teacher=syllabus.teacher,
-            academic_year=current_year,
-            semester=current_year.current_semester,
+            academic_year=upcoming_year,
+            semester=syllabus.semester,
             quiz_count=syllabus.quiz_count,
         )
         
@@ -59,8 +61,6 @@ class Syllabus(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.PROTECT)
     academic_year = models.ForeignKey(AcademicYear, on_delete=models.PROTECT)    
     semester = models.IntegerField(choices=Semester.choices)
-    quiz_count = models.IntegerField(default=1)  # Maximum quizzes for this syllabus
-
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
@@ -77,7 +77,7 @@ class Syllabus(models.Model):
         return f'{self.academic_year} - {self.student_group.name if self.student_group else "No Group"} - {self.course.name}'
     
     def can_add_quiz(self):
-        return self.quizzes_for_this_syllabus.count() < self.quiz_count
+        return not self.quizzes_for_this_syllabus.exists() 
 
     def soft_delete(self):
         """Mark this syllabus as deleted."""
@@ -92,4 +92,3 @@ class Syllabus(models.Model):
     def copy_to_current_year(self):
         """Convenience instance method to copy the syllabus to the current year."""
         return Syllabus.objects.copy_syllabus_to_current_year(self.id)
-    
