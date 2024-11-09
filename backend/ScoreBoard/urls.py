@@ -10,5 +10,5 @@ def home(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('users.urls')),
-    path('quiz/', include('quiz.urls')),
+    path('quiz/', include('quiz.urls', namespace='quiz')),
 ]

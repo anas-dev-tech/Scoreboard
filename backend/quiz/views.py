@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from django.views.generic import ListView
+from django.views.generic import ListView, UpdateView
+
 from .models import Quiz
 from django.contrib.auth.mixins import LoginRequiredMixin
 class TeacherUserMixin:
@@ -25,3 +26,10 @@ class QuizTeacherListView(LoginRequiredMixin, QuizTeacherMixin, ListView):
     model = Quiz
     template_name = 'quiz/teacher/list.html'
     context_object_name = 'quizzes'
+
+
+class QuizTeacherUpdateView(LoginRequiredMixin, QuizTeacherMixin, UpdateView):
+    model = Quiz
+    template_name = 'quiz/teacher/update.html'
+    fields = ['title', 'number_of_questions', 'is_randomized']
+    

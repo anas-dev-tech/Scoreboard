@@ -74,7 +74,7 @@ class Syllabus(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.academic_year} - {self.student_group.name if self.student_group else "No Group"} - {self.course.name}'
+        return f'{self.academic_year} - {self.student_group.number if self.student_group else "No Group"} - {self.course.name}'
     
     def can_add_quiz(self):
         return not self.quizzes_for_this_syllabus.exists() 

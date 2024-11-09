@@ -1,15 +1,19 @@
 from django.db import models
 from core.constants import YearLevel, EducationType, StudentGroupNumber
 from django.core.exceptions import ValidationError
-from academics.models import AcademicYear  
     
 class StudentGroup(models.Model):
     '''Model definition for StudentGroup.'''
-    number = models.SmallIntegerField(choices=StudentGroupNumber.choices)
+    number = models.SmallIntegerField(choices=StudentGroupNumber.choices, default=StudentGroupNumber.GROUP_1)  
     year_level = models.IntegerField(choices=YearLevel.choices)
     major = models.ForeignKey('academics.Major', on_delete=models.CASCADE)
     education_type = models.IntegerField(choices=EducationType.choices)
-    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE)
+    academic_year = models.ForeignKey(
+        'academics.AcademicYear',
+        on_delete=models.CASCADE,
+        null=True,# This option only to solve migrations problems
+        blank=True # This option only to solve migrations problems
+    )
     
     def clean(self):
         if self.year_level > self.major.duration_years:

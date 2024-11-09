@@ -64,7 +64,7 @@ class TeacherAdmin(admin.ModelAdmin):
 class StudentGroupAdmin(admin.ModelAdmin):
     """Admin View for StudentGroup)"""
 
-    list_display = ("name", "major")
+    list_display = ("number", "major")
     list_filter = ["major", "year_level"]
     list_per_page = 20
 

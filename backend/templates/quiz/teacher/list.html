@@ -109,7 +109,9 @@
                                                     
                                                 
                                                 <tr class=" {% cycle odd even %}">
-                                                    <td class="sorting_1 dtr-control" tabindex="0">{{ quiz.title }}</td>
+                                                    <td class="sorting_1 dtr-control" tabindex="0">
+                                                        <a href="{% url "quiz:teacher_quiz_update" %}"> {{ quiz.title }}</a>
+                                                    </td>
                                                     <td>{{ quiz.status }}</td>
                                                     <td>{{ quiz.number_of_questions }}</td>
                                                     <td>{{ quiz.time }}</td>
