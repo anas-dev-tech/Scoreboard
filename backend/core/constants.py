@@ -61,4 +61,12 @@ class QuizStudentStatus(IntegerChoices):
     FAIL = 2, 'Fail'
     ABSENT = 3, 'Absent'
     UPCOMING = 4, 'Upcoming'
+
+
+class StudentGroupNumber(IntegerChoices):
+    GROUP_1 = 1, 'Group 1'
+    GROUP_2 = 2, 'Group 2'
+    GROUP_3 = 3, 'Group 3'
+    GROUP_4 = 4, 'Group 4'
+    GROUP_5 = 5, 'Group 5'
     
