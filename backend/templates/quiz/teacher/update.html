@@ -97,7 +97,7 @@
                                      tabindex="0">
                                      <div class="row">
                                         <div class="col-12">
-                                            <button type="button" class="btn btn-primary" hx-get="{% url 'quiz:create-question' quiz_id %}" hx-target="#questionModal .modal-content" hx-trigger="click" data-bs-toggle="modal" data-bs-target="#questionModal">
+                                            <button id="add-question-btn" type="button" class="btn btn-primary" hx-get="{% url 'quiz:create-question' quiz_id %}" hx-target="#questionModal .modal-content" hx-trigger="click" data-bs-toggle="modal" data-bs-target="#questionModal">
                                                 Create Question
                                             </button>
                                             

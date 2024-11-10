@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.views.generic import ListView, UpdateView
 from django.views import View
 from django.shortcuts import get_object_or_404, redirect
-from .models import Quiz, Question
+from .models import Quiz, Question, QuestionOption
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import QuizForm, QuestionOptionFormSet, QuestionForm
@@ -68,48 +68,53 @@ def quiz_teacher_update_view(request, quiz_id):
     else:
         form = QuizForm(instance=quiz)
         questions = quiz.quiz_questions.all()
-        ic(questions)
     return render(
         request,
         "quiz/teacher/update.html",
-        {
-            "form": form,
-            "questions": questions,
-            "quiz_id": ic(quiz.id)},
+        {"form": form, "questions": questions, "quiz_id": ic(quiz.id)},
     )
 
 
 def create_question(request, quiz_id):
     quiz = get_object_or_404(Quiz, pk=quiz_id)
+    correct_option_selected = False  # Track if at least one option is marked as correct
 
     if request.method == "POST":
         form = QuestionForm(request.POST)
-        formset = QuestionOptionFormSet(request.POST)
+        formset = QuestionOptionFormSet(
+            request.POST, queryset=QuestionOption.objects.none()
+        )
 
         if form.is_valid() and formset.is_valid():
             question = form.save(commit=False)
-            question.quiz = quiz  # Link question to quiz
+            question.quiz = quiz
             question.save()
-            formset.instance = question
-            formset.save()
+
+            # Save formset and handle "is_correct" selection
+            for option_form in formset:
+                option = option_form.save(commit=False)
+                option.question = question
+                # Check if the current option's prefix matches the selected "is_correct" value
+                if ic(request.POST.get("is_correct")) == option_form.prefix:
+                    option.is_correct = True
+                    correct_option_selected = True  # Track if at least one option is marked as correct
+                else:
+                    option.is_correct = False
+                option.save()
+                
+        # Check if at least one option is marked as correct
+        if not correct_option_selected:
+            formset.non_form_errors = ["Please select at least one correct option."]
             return render(
-                request, "partials/success_message.html"
-            )  # Partial template for successful save
+                request, "partials/question_form.html", {"form": form, "formset": formset, 'quiz_id':quiz_id}
+            )
+        return render(request, "partials/success_message.html", {'quiz_id':quiz_id})
 
-        return render(
-            request,
-            "partials/question_form.html",
-            {"form": form, "formset": formset, "quiz": quiz},
-        )  # Return form with errors if invalid
-
-    # GET request: show empty form
+    # For GET request, return the empty form and formset
     form = QuestionForm()
     formset = QuestionOptionFormSet()
     return render(
         request,
         "partials/question_form.html",
-        {
-            "form": form,
-            "formset": formset,
-            "quiz": quiz},
+        {"form": form, "formset": formset, "quiz_id": quiz_id},
     )

@@ -84,6 +84,11 @@ class QuizForm(forms.ModelForm):
         
         
 
+class CustomBooleanRadioSelect(forms.RadioSelect):
+    def __init__(self, *args, **kwargs):
+        choices = [(True, 'Yes'), (False, 'No')]
+        super().__init__(choices=choices, *args, **kwargs)
+
 
 class QuestionForm(forms.ModelForm):
     class Meta:
@@ -91,26 +96,15 @@ class QuestionForm(forms.ModelForm):
         fields = ['text', 'quiz', 'score', 'difficulty_level']
 
 class QuestionOptionForm(forms.ModelForm):
+    is_correct = forms.BooleanField(required=False)
     class Meta:
         model = QuestionOption
         fields = ['text', 'is_correct']
-# forms.py (continue)
-from django.core.exceptions import ValidationError
-
 
 class QuestionOptionFormSet(inlineformset_factory(
     Question,
     QuestionOption,
     form=QuestionOptionForm,
     extra=2,  # Number of extra forms displayed
-    can_delete=True  # Allows users to delete options
 )):
-    def clean(self):
-        super().clean()
-        correct_answers = 0
-        for form in self.forms:
-            if form.cleaned_data.get('is_correct'):
-                correct_answers += 1
-
-        if correct_answers != 1 :
-            raise ValidationError("Only one option can be marked as correct.")
+    pass
