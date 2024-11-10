@@ -20,7 +20,7 @@ class StudentGroup(models.Model):
             raise ValidationError("Year of subject cannot be greater than the max year in the major")
 
     def __str__(self):
-        return f'{self.major.name}-{self.year_level} --- {self.name}'
+        return f'{self.major.name}-{self.year_level} --- {self.number}'
 
 
 class Student(models.Model):

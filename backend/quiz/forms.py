@@ -2,24 +2,7 @@ from django import forms
 from .models import Quiz, QuizSession, Question, QuestionOption
 from core.constants import QuizStatus
 from icecream import ic
-
-
-class SyllabusForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        # Get the syllabus data passed to the form on initialization
-        syllabus_data = kwargs.pop('syllabus_data', {})
-        super(SyllabusForm, self).__init__(*args, **kwargs)
-        
-        # Dynamically add fields based on syllabus data
-        for student_group, syllabuses in syllabus_data.items():
-            # Add a checkbox for the student group
-            self.fields[f'group_{student_group.id}'] = forms.BooleanField(required=False, label=student_group)
-            
-            # Add checkboxes for each course under the student group
-            for syllabus in syllabuses:
-                self.fields[f'syllabus_{syllabus.id}'] = forms.BooleanField(required=False, label=syllabus.course)
-
-
+from django.forms.models import inlineformset_factory
 
 class ExistingQuizForm(forms.ModelForm):
     quiz = forms.ModelChoiceField(queryset=Quiz.objects.filter(status=QuizStatus.READY), label="Select Existing Quiz")
@@ -27,10 +10,6 @@ class ExistingQuizForm(forms.ModelForm):
     class Meta:
         model = Quiz
         fields = ['quiz']
-
-# forms.py
-from django import forms
-from .models import Quiz, QuizSession
 
 class AddQuizzesForm(forms.ModelForm):
     quizzes = forms.ModelMultipleChoiceField(queryset=Quiz.objects.all(), widget=forms.SelectMultiple)
@@ -61,7 +40,6 @@ class QuestionOptionFormTabularInline(forms.ModelForm):
         fields = '__all__'
         
 
-from django import forms
 from django.forms.models import BaseInlineFormSet
 from django.core.exceptions import ValidationError
 from .models import QuestionOption
@@ -96,3 +74,43 @@ class QuestionOptionInlineFormSet(BaseInlineFormSet):
         
         if question.is_multiple_choice_question() and num_options < 2:
             raise ValidationError("Multiple Choice questions must have at least 2 options.")
+
+
+class QuizForm(forms.ModelForm):
+    class Meta:
+        model = Quiz
+        fields = ('title', 'number_of_questions', 'quiz_for', 'is_randomized', 'easy_questions_count', 'medium_questions_count', 'hard_questions_count', 'status', )
+        
+        
+        
+
+
+class QuestionForm(forms.ModelForm):
+    class Meta:
+        model = Question
+        fields = ['text', 'quiz', 'score', 'difficulty_level']
+
+class QuestionOptionForm(forms.ModelForm):
+    class Meta:
+        model = QuestionOption
+        fields = ['text', 'is_correct']
+# forms.py (continue)
+from django.core.exceptions import ValidationError
+
+
+class QuestionOptionFormSet(inlineformset_factory(
+    Question,
+    QuestionOption,
+    form=QuestionOptionForm,
+    extra=2,  # Number of extra forms displayed
+    can_delete=True  # Allows users to delete options
+)):
+    def clean(self):
+        super().clean()
+        correct_answers = 0
+        for form in self.forms:
+            if form.cleaned_data.get('is_correct'):
+                correct_answers += 1
+
+        if correct_answers != 1 :
+            raise ValidationError("Only one option can be marked as correct.")

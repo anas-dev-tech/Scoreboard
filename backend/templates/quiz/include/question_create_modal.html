@@ -1,0 +1,47 @@
+<div class="modal fade" id="questionModal" tabindex="-1" aria-labelledby="questionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="questionModalLabel">Create Question</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                
+                <!-- Tab navigation -->
+                <ul class="nav nav-tabs" id="questionTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="question-tab" data-bs-toggle="tab" data-bs-target="#question" type="button" role="tab" aria-controls="question" aria-selected="true">Question</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="options-tab" data-bs-toggle="tab" data-bs-target="#options" type="button" role="tab" aria-controls="options" aria-selected="false">Options</button>
+                    </li>
+                </ul>
+
+                <!-- Tab content with HTMX for form submission -->
+                <form hx-post="{% url 'quiz:create-question' quiz.id %}" hx-target="#questionModal" hx-swap="outerHTML">
+                    <div class="tab-content mt-3" id="questionTabContent">
+                        <!-- Question Form Tab -->
+                        <div class="tab-pane fade show active" id="question" role="tabpanel" aria-labelledby="question-tab">
+                            {{ form.as_p }}
+                        </div>
+
+                        <!-- Options Formset Tab -->
+                        <div class="tab-pane fade" id="options" role="tabpanel" aria-labelledby="options-tab">
+                            {{ formset.management_form }}
+                            {% for option_form in formset %}
+                                <div class="mb-3">
+                                    {{ option_form.as_p }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save Question</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

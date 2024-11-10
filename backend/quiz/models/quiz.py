@@ -63,7 +63,7 @@ class Quiz(models.Model):
     time = models.IntegerField(default=90)
     number_of_questions = models.IntegerField(default=20, blank=True)
     required_score_to_pass = models.IntegerField(default=50)
-    quiz_for = models.ManyToManyField(Syllabus, related_name='quizzes_for_this_syllabus', through='QuizSyllabus')
+    quiz_for = models.ManyToManyField(Syllabus, related_name='quizzes_for_this_syllabus')
     is_randomized = models.BooleanField(default=False)
     easy_questions_count = models.IntegerField(default=0, blank=True, null=True)
     medium_questions_count = models.IntegerField(default=0, blank=True, null=True)
@@ -95,11 +95,3 @@ class Quiz(models.Model):
         return self.title or "Untitled Quiz"
 
 
-class QuizSyllabus(models.Model):
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='quiz_syllabuses')
-    syllabus = models.ForeignKey(Syllabus, on_delete=models.CASCADE, related_name='syllabus_quizzes')
-
-
-    def clean(self):
-        if not self.syllabus.can_add_quiz():
-            raise ValidationError("Cannot add more quizzes for this syllabus.")

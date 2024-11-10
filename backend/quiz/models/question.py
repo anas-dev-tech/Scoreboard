@@ -13,24 +13,13 @@ class Question(models.Model):
         "quiz.Quiz",
         on_delete=models.CASCADE,
         related_name='quiz_questions'
-    )
-    answer= models.OneToOneField(
-        "QuestionOption",
-        on_delete=models.CASCADE,
-        related_name='question_answer',
-        blank=True,
-        null=True
     )    
     score = models.DecimalField(max_digits=4, decimal_places=2)
-    question_difficulty = models.SmallIntegerField(
+    difficulty_level = models.SmallIntegerField(
         choices=QuestionDifficulty.choices,
         default=QuestionDifficulty.EASY
     )
-    
-    question_type = models.IntegerField(
-        choices=QuestionType.choices,
-        default=QuestionType.MULTIPLE_CHOICE
-    )
+
 
     def __str__(self):
         return self.text
@@ -48,7 +37,7 @@ class QuestionOption(models.Model):
         on_delete=models.CASCADE,
         related_name='question_options'
     )
-    
+    is_correct = models.BooleanField(default=False)
     def __str__(self):
         return self.text
     

@@ -32,8 +32,10 @@ INSTALLED_APPS = [
     'academics',
     'core',
     
+    
     # third-party apps
     'jazzmin',
+    'django_htmx',
     
     # default apps    
     'django.contrib.admin',
@@ -54,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'users.middleware.ForcePasswordChangeMiddleware',
+    'django_htmx.middleware.HtmxMiddleware',
 ]
 
 ROOT_URLCONF = 'ScoreBoard.urls'

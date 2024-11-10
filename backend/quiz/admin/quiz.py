@@ -3,17 +3,9 @@ from django.urls import path
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from icecream import ic
-from ..models import Quiz, QuizSyllabus, QuizSyllabus, QuestionOption
+from ..models import Quiz, QuestionOption
 from academics.models import Syllabus
-from ..forms import SyllabusForm, QuestionForm
-
-
-class QuizSyllabusInline(admin.TabularInline): 
-    model = QuizSyllabus 
-    fields = ['syllabus']
-    extra = 1
-
-
+from ..forms import QuestionForm
 
 
 
@@ -23,10 +15,6 @@ class QuizAdmin(admin.ModelAdmin):
 
     list_display = ("title", "time", 'status')
     list_filter = ("quiz_for__course", 'status', 'quiz_for__student_group', 'quiz_for__teacher')
-    inlines = [
-        QuizSyllabusInline,
-        # QuestionInline,
-    ]
     actions = ['publish_quizzes']
 
 
