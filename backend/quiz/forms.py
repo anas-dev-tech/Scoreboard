@@ -81,19 +81,11 @@ class QuizForm(forms.ModelForm):
         model = Quiz
         fields = ('title', 'number_of_questions', 'quiz_for', 'is_randomized', 'easy_questions_count', 'medium_questions_count', 'hard_questions_count', 'status', )
         
-        
-        
-
-class CustomBooleanRadioSelect(forms.RadioSelect):
-    def __init__(self, *args, **kwargs):
-        choices = [(True, 'Yes'), (False, 'No')]
-        super().__init__(choices=choices, *args, **kwargs)
-
 
 class QuestionForm(forms.ModelForm):
     class Meta:
         model = Question
-        fields = ['text', 'quiz', 'score', 'difficulty_level']
+        fields = ['text', 'score', 'difficulty_level']
 
 class QuestionOptionForm(forms.ModelForm):
     is_correct = forms.BooleanField(required=False)
@@ -105,6 +97,9 @@ class QuestionOptionFormSet(inlineformset_factory(
     Question,
     QuestionOption,
     form=QuestionOptionForm,
+    min_num=2,  # Minimum number of forms displayed
+    validate_min=True,  # Validate that at least min_num forms are submitted
+    max_num=4,  # Maximum number of forms displayed (None means no limit)
     extra=2,  # Number of extra forms displayed
 )):
     pass

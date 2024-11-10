@@ -23,12 +23,9 @@ class Question(models.Model):
 
     def __str__(self):
         return self.text
-
-    def is_true_or_false_question(self):
-        return self.question_type == QuestionType.TRUE_OR_FALSE
-
-    def is_multiple_choice_question(self):
-        return self.question_type == QuestionType.MULTIPLE_CHOICE
+    
+    def answer(self):
+        return self.question_options.filter(is_correct=True).first()
 
 class QuestionOption(models.Model):
     text = models.CharField(max_length=50, null=False, blank=False)
@@ -38,6 +35,7 @@ class QuestionOption(models.Model):
         related_name='question_options'
     )
     is_correct = models.BooleanField(default=False)
+
     def __str__(self):
         return self.text
     

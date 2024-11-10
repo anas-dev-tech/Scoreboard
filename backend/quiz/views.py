@@ -6,6 +6,9 @@ from .models import Quiz, Question, QuestionOption
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import QuizForm, QuestionOptionFormSet, QuestionForm
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+
 from icecream import ic
 
 
@@ -118,3 +121,18 @@ def create_question(request, quiz_id):
         "partials/question_form.html",
         {"form": form, "formset": formset, "quiz_id": quiz_id},
     )
+
+def question_list(request, quiz_id):
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
+    questions = quiz.quiz_questions.all()
+    
+    page_number = request.GET.get('page', 1)
+    
+    # Set the number of questions per page
+    questions_per_page = 10
+    paginator = Paginator(questions, questions_per_page)
+    page_obj = paginator.get_page(page_number)
+    
+    if request.htmx:
+        return render(request, 'partials/question_list.html', {'page_obj': page_obj, 'quiz_id':quiz_id})
+    
