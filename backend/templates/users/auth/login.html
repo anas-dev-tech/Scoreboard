@@ -1,119 +1,101 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-    <!--begin::Head-->
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <title>AdminLTE 4 | Login Page v2</title><!--begin::Primary Meta Tags-->
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="title" content="AdminLTE 4 | Login Page v2">
-        <meta name="author" content="ColorlibHQ">
-        <meta name="description"
-              content="AdminLTE is a Free Bootstrap 5 Admin Dashboard, 30 example pages using Vanilla JS.">
-        <meta name="keywords"
-              content="bootstrap 5, bootstrap, bootstrap 5 admin dashboard, bootstrap 5 dashboard, bootstrap 5 charts, bootstrap 5 calendar, bootstrap 5 datepicker, bootstrap 5 tables, bootstrap 5 datatable, vanilla js datatable, colorlibhq, colorlibhq dashboard, colorlibhq admin dashboard">
-       {% include 'include/head_styles.html' %}
-    </head>
-    <!--end::Head--> <!--begin::Body-->
-    <body class="login-page bg-body-secondary">
-        {% if error %}<p>{{ error }}</p>{% endif %}
-        
-        <div class="login-box">
-            <div class="card card-outline card-primary">
-                <div class="card-header">
-                    <a href="../index2.html"
-                       class="link-dark text-center link-offset-2 link-opacity-100 link-opacity-50-hover">
-                        <h1 class="mb-0">
-                            <b>Admin</b>LTE
-                        </h1>
-                    </a>
+<!--begin::Head-->
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Login Page</title><!--begin::Primary Meta Tags-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="title" content="Scorebored| Login Page ">
+    <meta name="author" content="Scorebored Team">
+    <meta name="keywords" content="username, password, login, authentication, django, python, web development">
+    <meta name="description" content="A simple login form using Django, a high-level Python web framework. Users ca
+        n enter their username and password to authenticate and access the website.">
+    {% include 'include/head_styles.html' %}
+
+    <style>
+        :root {
+            --s-main-color: #0d6efd;
+        }
+
+        svg path:first-child {
+            fill: var(--s-main-color);
+        }
+    </style>
+</head>
+<!--end::Head--> <!--begin::Body-->
+
+<body class="hold-transition login-page">
+    <div class="login-box">
+        <div class="card ">
+            <div class="card-header">
+                <div class="img text-center">
+                    <!-- Logo -->
+                    {% include 'include/logo.html' %}
                 </div>
-                <div class="card-body login-card-body">
-                    <p class="login-box-msg">Sign in to start your session</p>
-                    <form method="post">
-                        {% csrf_token %}
-                        {{ form.as_p }}
-                        <div class="input-group mb-1">
-                            <div class="form-floating">
-                                <input id="loginEmail"
-                                       type="email"
-                                       name="username"
-                                       class="form-control"
-                                       placeholder="">
-                                <label for="loginEmail">Email</label>
-                            </div>
-                            <div class="input-group-text">
-                                <span class="bi bi-envelope"></span>
-                            </div>
-                        </div>
-                        <div class="input-group mb-1">
-                            <div class="form-floating">
-                                <input id="loginPassword"
-                                       name="password"
-                                       type="password"
-                                       class="form-control"
-                                       placeholder="">
-                                <label for="loginPassword">Password</label>
-                            </div>
-                            <div class="input-group-text">
-                                <span class="bi bi-lock-fill"></span>
-                            </div>
-                        </div>
-                        <!--begin::Row-->
-                        <div class="row">
-                            <div class="col-6 d-inline-flex align-items-center">
-                                <div class="form-check">
-                                    <input class="form-check-input"
-                                           type="checkbox"
-                                           value=""
-                                           id="flexCheckDefault">
-                                    <label class="form-check-label" for="flexCheckDefault">Remember Me</label>
-                                </div>
-                            </div>
-                            <!-- /.col -->
-                            <div class="col-6">
-                                <div class="d-grid gap-2">
-                                    <a href="#">I forgot my password</a>
-                                </div>
-                            </div>
-                            <!-- /.col -->
-                        </div>
-                        <!--end::Row-->
-                        <button type="submit" class="btn btn-primary w-100 mt-3">Sign In</button>
-                        <input type="hidden" name="next" value="{{ next_url }}">
-                    </form>
-                    {% comment %} <p class="mb-1">  </p> {% endcomment %}
+                <div style="margin-top: -25px;" class="text-center text-uppercase">
+                    <h3>sc<span style="color: var(--s-main-color);">o</span>rebored</h3>
                 </div>
-                <!-- /.login-card-body -->
             </div>
+            <div class="card-body">
+                <p class="login-box-msg">Sign in to start your session</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <!-- Email -->
+                    <div class="input-group mb-3">
+                        <input id="loginEmail" type="email" name="username" class="form-control" placeholder="Email"
+                            required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-envelope"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Password -->
+                    <div class="input-group mb-3">
+                        <input id="loginPassword" name="password" type="password" class="form-control"
+                            placeholder="Password" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <!--begin::Row-->
+                    <div class="row mt-3">
+                        <div class="col-6 d-inline-flex align-items-center">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                                <label class="form-check-label" for="flexCheckDefault">Remember Me</label>
+                            </div>
+                        </div>
+                        <!-- /.col -->
+                        <div class="col-6">
+                            <div class="d-grid gap-2">
+                                <a href="#"
+                                    class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover">I
+                                    forgot my password</a>
+                            </div>
+                        </div>
+                        <!-- /.col -->
+                    </div>
+                    <!--end::Row-->
+                    <button type="submit" class="btn btn-primary w-100 mt-3 mb-3">Sign In</button>
+                    <input type="hidden" name="next" value="{{ next_url }}">
+
+                </form>
+            </div>
+            <!-- /.login-card-body -->
         </div>
-        <!-- /.login-box --> <!--begin::Third Party Plugin(OverlayScrollbars)-->
-         <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->
-         {% include 'include/head_scripts.html' %}
-        <script>
-        const SELECTOR_SIDEBAR_WRAPPER = ".sidebar-wrapper";
-        const Default = {
-            scrollbarTheme: "os-theme-light",
-            scrollbarAutoHide: "leave",
-            scrollbarClickScroll: true,
-        };
-        document.addEventListener("DOMContentLoaded", function() {
-            const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
-            if (
-                sidebarWrapper &&
-                typeof OverlayScrollbarsGlobal?.OverlayScrollbars !== "undefined"
-            ) {
-                OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
-                    scrollbars: {
-                        theme: Default.scrollbarTheme,
-                        autoHide: Default.scrollbarAutoHide,
-                        clickScroll: Default.scrollbarClickScroll,
-                    },
-                });
-            }
-        });
-        </script>
-        <!--end::OverlayScrollbars Configure--> <!--end::Script-->
-    </body>
-    <!--end::Body-->
+        <div style="height: 24px;" class="error mt-2">
+            {% if error %}<p class="text-center text-danger mb-0">{{ error }}</p>{% endif %}
+        </div>
+    </div>
+    <!-- /.login-box --> <!--begin::Third Party Plugin(OverlayScrollbars)-->
+    <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->
+    {% include 'include/head_scripts.html' %}
+</body>
+<!--end::Body-->
+
 </html>
