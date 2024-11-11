@@ -22,16 +22,11 @@
         svg path:first-child {
             fill: var(--s-main-color);
         }
-
-        body {
-            background-color: white;
-            background-image: url("{% static './assets/images/cubes.png' %}");
-        }
     </style>
 </head>
 <!--end::Head--> <!--begin::Body-->
 
-<body class="login-page">
+<body class="hold-transition login-page">
     <div class="login-box">
         <div class="card ">
             <div class="card-header">
@@ -43,30 +38,28 @@
                     <h3>sc<span style="color: var(--s-main-color);">o</span>rebored</h3>
                 </div>
             </div>
-            <div class="card-body login-card-body pb-0">
+            <div class="card-body">
                 <p class="login-box-msg">Sign in to start your session</p>
                 <form method="post">
                     {% csrf_token %}
-                    {{ form.as_p }}
                     <!-- Email -->
-                    <div class="input-group mb-1">
-                        <div class="form-floating">
-                            <input id="loginEmail" type="email" name="username" class="form-control" placeholder="" required>
-                            <label for="loginEmail">Email</label>
-                        </div>
-                        <div class="input-group-text">
-                            <span class="bi bi-envelope"></span>
+                    <div class="input-group mb-3">
+                        <input id="loginEmail" type="email" name="username" class="form-control" placeholder="Email"
+                            required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-envelope"></span>
+                            </div>
                         </div>
                     </div>
                     <!-- Password -->
-                    <div class="input-group mb-1">
-                        <div class="form-floating">
-                            <input id="loginPassword" name="password" type="password" class="form-control"
-                                placeholder="" required>
-                            <label for="loginPassword">Password</label>
-                        </div>
-                        <div class="input-group-text">
-                            <span class="bi bi-lock-fill"></span>
+                    <div class="input-group mb-3">
+                        <input id="loginPassword" name="password" type="password" class="form-control"
+                            placeholder="Password" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
                         </div>
                     </div>
                     <!--begin::Row-->
@@ -90,13 +83,13 @@
                     <!--end::Row-->
                     <button type="submit" class="btn btn-primary w-100 mt-3 mb-3">Sign In</button>
                     <input type="hidden" name="next" value="{{ next_url }}">
-                    
+
                 </form>
             </div>
             <!-- /.login-card-body -->
         </div>
         <div style="height: 24px;" class="error mt-2">
-        {% if error %}<p class="text-center text-danger mb-0">{{ error }}</p>{% endif %}
+            {% if error %}<p class="text-center text-danger mb-0">{{ error }}</p>{% endif %}
         </div>
     </div>
     <!-- /.login-box --> <!--begin::Third Party Plugin(OverlayScrollbars)-->

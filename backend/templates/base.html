@@ -12,19 +12,38 @@
             {% endblock title %}
         </title>
     </head>
-    <body class="layout-fixed sidebar-expand-lg bg-body-tertiary app-loaded sidebar-collapse">
+    <body class="sidebar-mini sidebar-collapse">
 
-        <div class="app-wrapper">
+        <div class="wrapper">
+            <!-- Navbar -->
             {% include "include/header.html" %}
+            <!-- Sidebar -->
             {% include "include/sidebar.html" %}
-
-            <main class="app-main">
+            <!--+Content+Wrapper.+Contains+page+content+-->
+            <div class="content-wrapper">
                 {% block content %}
                 {% endblock content %}
-            </main>
+            </div>
         </div>
 
         {% include "include/head_scripts.html" %}
-
+        <!-- Page specific script -->
+<script>
+    $(function () {
+      $("#example1").DataTable({
+        "responsive": true, "lengthChange": false, "autoWidth": false,
+        "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+      }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+      $('#example2').DataTable({
+        "paging": true,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false,
+        "responsive": true,
+      });
+    });
+  </script>
     </body>
 </html>
