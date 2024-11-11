@@ -99,33 +99,64 @@
                                      aria-labelledby="pills-profile-tab"
                                      tabindex="0">
                                     <div class="row">
-                                        <div class="col-12">
-                                            <button id="add-question-btn"
-                                                    type="button"
-                                                    class="btn btn-primary"
-                                                    hx-get="{% url 'quiz:create-question' quiz_id %}"
-                                                    hx-target="#questionModal .modal-content"
-                                                    hx-trigger="click"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#questionModal">Create Question</button>
+                                        <div class="col-6">
+                                            <div id="example1_filter" class="dataTables_filter">
+                                                <div class="input-group mb-3">
+                                                    <span class="input-group-text" id="basic-addon1"><i class="bi bi-search"></i></span>
+                                                    <input type="text"
+                                                           class="form-control"
+                                                           placeholder="Search"
+                                                           aria-label="Search"
+                                                           aria-describedby="basic-addon1">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <!-- create question Btn -->
+                                            <div class="btn-group"
+                                                 role="group"
+                                                 aria-label="Button group with nested dropdown">
+                                                <button id="add-question-btn"
+                                                        type="button"
+                                                        class="btn btn-success"
+                                                        hx-get="{% url 'quiz:create-question' quiz_id %}"
+                                                        hx-target="#questionModal .modal-content"
+                                                        hx-trigger="click"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#questionModal">Create Question</button>
+                                                <div class="btn-group" role="group">
+                                                    <button type="button"
+                                                            class="btn btn-success dropdown-toggle"
+                                                            data-bs-toggle="dropdown"
+                                                            aria-expanded="false"></button>
+                                                    <ul class="dropdown-menu">
+                                                        <li>
+                                                            <a class="dropdown-item" href="#">Dropdown link</a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item" href="#">Dropdown link</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div  class="row">
+                                    <div class="row">
                                         <div id="question-list" class="col-12">
                                             {% include "quiz/include/question_list.html" with questions=questions %}
                                             <div class="pagination-controls">
                                                 {% if page_obj.has_previous %}
-                                                <button hx-get="{% url 'quiz:list-question' quiz_id %}?page={{ page_obj.previous_page_number }}"
-                                                hx-target="#question-list"
-                                                hx-swap="innerHTML"
-                                                class="btn btn-secondary">Previous</button>
+                                                    <button hx-get="{% url 'quiz:list-question' quiz_id %}?page={{ page_obj.previous_page_number }}"
+                                                            hx-target="#question-list"
+                                                            hx-swap="innerHTML"
+                                                            class="btn btn-secondary">Previous</button>
                                                 {% endif %}
                                                 <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
                                                 {% if page_obj.has_next %}
-                                                <button hx-get="{% url 'quiz:list-question' quiz_id %}?page={{ page_obj.next_page_number }}"
-                                                hx-target="#question-list"
-                                                hx-swap="innerHTML"
-                                                class="btn btn-primary">Next</button>
+                                                    <button hx-get="{% url 'quiz:list-question' quiz_id %}?page={{ page_obj.next_page_number }}"
+                                                            hx-target="#question-list"
+                                                            hx-swap="innerHTML"
+                                                            class="btn btn-primary">Next</button>
                                                 {% endif %}
                                             </div>
                                         </div>

@@ -1,5 +1,5 @@
 <table id="example2"
-       class="table table-bordered table-hover dataTable dtr-inline"
+       class="table table-bordered"
        aria-describedby="example2_info">
     <thead>
         <tr>
@@ -33,10 +33,21 @@
     <tbody>
         {% for question in questions %}
             <tr class="{% cycle 'odd' 'even' %}">
-                <td class="dtr-control sorting_1" tabindex="0">{{ question.text }}</td>
+                <td  tabindex="0">
+                    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+                    <a href="#"
+                        hx-get="{% url "quiz:edit-question" quiz_id question.id %}"
+                        hx-target=".modal-content"
+                        hx-swap="innerHTML"
+                        data-bs-toggle="modal"
+                        data-bs-target="#questionModal"
+                        >
+                        {{ question.text }}
+                </a>
+                </td>
                 <td>{{ question.answer }}s</td>
                 <td>{{ question.score }}</td>
-                <td>{{ quesiton.difficulty_level }}</td>
+                <td>{{ question.get_difficulty_level_display }}</td>
             </tr>
         {% endfor %}
     </tbody>

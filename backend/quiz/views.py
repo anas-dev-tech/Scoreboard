@@ -80,8 +80,6 @@ def quiz_teacher_update_view(request, quiz_id):
 
 def create_question(request, quiz_id):
     quiz = get_object_or_404(Quiz, pk=quiz_id)
-    correct_option_selected = False  # Track if at least one option is marked as correct
-
     if request.method == "POST":
         form = QuestionForm(request.POST)
         formset = QuestionOptionFormSet(
@@ -92,26 +90,18 @@ def create_question(request, quiz_id):
             question = form.save(commit=False)
             question.quiz = quiz
             question.save()
+            formset.instance = question
+            formset.save()
 
-            # Save formset and handle "is_correct" selection
-            for option_form in formset:
-                option = option_form.save(commit=False)
-                option.question = question
-                # Check if the current option's prefix matches the selected "is_correct" value
-                if ic(request.POST.get("is_correct")) == option_form.prefix:
-                    option.is_correct = True
-                    correct_option_selected = True  # Track if at least one option is marked as correct
-                else:
-                    option.is_correct = False
-                option.save()
-                
-        # Check if at least one option is marked as correct
-        if not correct_option_selected:
-            formset.non_form_errors = ["Please select at least one correct option."]
             return render(
-                request, "partials/question_form.html", {"form": form, "formset": formset, 'quiz_id':quiz_id}
+                request, "partials/success_message.html", {"quiz_id": quiz_id}
             )
-        return render(request, "partials/success_message.html", {'quiz_id':quiz_id})
+
+        return render(
+            request,
+            "partials/question_form.html",
+            {"form": form, "formset": formset, "quiz_id": quiz_id},
+        )
 
     # For GET request, return the empty form and formset
     form = QuestionForm()
@@ -122,17 +112,76 @@ def create_question(request, quiz_id):
         {"form": form, "formset": formset, "quiz_id": quiz_id},
     )
 
+
 def question_list(request, quiz_id):
     quiz = get_object_or_404(Quiz, pk=quiz_id)
     questions = quiz.quiz_questions.all()
-    
-    page_number = request.GET.get('page', 1)
-    
+    page_number = request.GET.get("page", 1)
+
     # Set the number of questions per page
     questions_per_page = 10
     paginator = Paginator(questions, questions_per_page)
     page_obj = paginator.get_page(page_number)
-    
+
     if request.htmx:
-        return render(request, 'partials/question_list.html', {'page_obj': page_obj, 'quiz_id':quiz_id})
-    
+        return render(
+            request,
+            "partials/question_list.html",
+            {"page_obj": page_obj, "quiz_id": quiz_id},
+        )
+
+
+def edit_question(request, quiz_id, question_id):
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
+    question = get_object_or_404(Question, pk=question_id, quiz=quiz)
+
+    if request.method == "POST":
+        form = QuestionForm(request.POST, instance=question)
+        formset = QuestionOptionFormSet(request.POST, instance=question)
+
+        if form.is_valid() and formset.is_valid():
+            form.save()
+            formset.save()
+
+            # Return a response for HTMX to confirm form saved and reload the modal content
+            return render(
+                request,
+                "partials/question_form.html",
+                {
+                    "form": form,
+                    "formset": formset,
+                    "quiz_id": quiz_id,
+                    "message": "Question updated successfully!",
+                    "question_id": question_id,
+                    "type": "edit",
+                },
+            )
+        else:
+            # Provide error feedback to user if form is not valid
+            return render(
+                request,
+                "partials/question_form.html",
+                {
+                    "form": form,
+                    "formset": formset,
+                    "quiz_id": quiz_id,
+                    "question_id": question_id,
+                    "errors": form.errors or formset.non_form_errors(),
+                    "type": "edit",
+                },
+            )
+    else:
+        form = QuestionForm(instance=question)
+        formset = QuestionOptionFormSet(instance=question)
+
+    return render(
+        request,
+        "partials/question_form.html",
+        {
+            "form": form,
+            "formset": formset,
+            "quiz_id": quiz_id,
+            "question_id": question_id,
+            "type": "edit",
+        },
+    )
