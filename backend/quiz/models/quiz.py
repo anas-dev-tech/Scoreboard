@@ -65,9 +65,6 @@ class Quiz(models.Model):
     required_score_to_pass = models.IntegerField(default=50)
     quiz_for = models.ManyToManyField(Syllabus, related_name='quizzes_for_this_syllabus')
     is_randomized = models.BooleanField(default=False)
-    easy_questions_count = models.IntegerField(default=0, blank=True, null=True)
-    medium_questions_count = models.IntegerField(default=0, blank=True, null=True)
-    hard_questions_count = models.IntegerField(default=0, blank=True, null=True)
     quiz_session = models.ForeignKey(QuizSession, on_delete=models.CASCADE, related_name='quizzes', null=True, blank=True)
     status = models.SmallIntegerField(choices=QuizStatus.choices, default=QuizStatus.DRAFT)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -79,14 +76,7 @@ class Quiz(models.Model):
         verbose_name = "Quiz"
         verbose_name_plural = "Quizzes"
     
-    def clean(self):
-        # Validate question count consistency
-        if self.number_of_questions != self.easy_questions_count + self.medium_questions_count + self.hard_questions_count:
-            raise ValidationError("Sum of easy, medium, and hard questions must equal the total number of questions.")
 
-        # Ensure quiz assignment to the current academic year syllabus
-        if not self.quiz_for.filter(academic_year__status=AcademicYearStatus.CURRENT).exists():
-            raise ValidationError("Quiz must be associated with a syllabus from the current academic year.")
     def can_publish(self):
         # Check if the quiz can be published
         return self.status == QuizStatus.DRAFT and self.quiz_for.exists()

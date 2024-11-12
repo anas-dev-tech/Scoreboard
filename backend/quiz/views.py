@@ -7,8 +7,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import QuizForm, QuestionOptionFormSet, QuestionForm, QuizForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
-
+from django.contrib.auth.decorators import login_required
 from icecream import ic
 
 
@@ -59,17 +58,17 @@ class QuizTeacherUpdateView(LoginRequiredMixin, QuizTeacherMixin, ListView, Upda
         "is_randomized",
     ]
 
-
-def quiz_teacher_update_view(request, quiz_id):
+@login_required
+def update_quiz(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id)
-    form = QuizForm()
+    form = QuizForm(user=request.user)
     if request.method == "POST":
-        form = QuizForm(request.POST, instance=quiz)
+        form = QuizForm(request.POST,user=request.user , instance=quiz)
         if form.is_valid():
             form.save()
             return redirect("quiz:teacher_quiz_list")
     else:
-        form = QuizForm(instance=quiz)
+        form = QuizForm(user=request.user, instance=quiz)
         questions = quiz.quiz_questions.all()
     return render(
         request,
@@ -77,7 +76,7 @@ def quiz_teacher_update_view(request, quiz_id):
         {"form": form, "questions": questions, "quiz_id": ic(quiz.id)},
     )
 
-
+@login_required
 def create_question(request, quiz_id):
     quiz = get_object_or_404(Quiz, pk=quiz_id)
     if request.method == "POST":
@@ -112,7 +111,7 @@ def create_question(request, quiz_id):
         {"form": form, "formset": formset, "quiz_id": quiz_id},
     )
 
-
+@login_required
 def question_list(request, quiz_id):
     quiz = get_object_or_404(Quiz, pk=quiz_id)
     questions = quiz.quiz_questions.all()
@@ -130,7 +129,7 @@ def question_list(request, quiz_id):
             {"page_obj": page_obj, "quiz_id": quiz_id},
         )
 
-
+@login_required
 def edit_question(request, quiz_id, question_id):
     quiz = get_object_or_404(Quiz, pk=quiz_id)
     question = get_object_or_404(Question, pk=question_id, quiz=quiz)
@@ -187,13 +186,21 @@ def edit_question(request, quiz_id, question_id):
     )
 
 
-
+@login_required
 def create_quiz(request):
-    form = QuizForm()
     if request.method == "POST":
-        form = QuizForm(request.POST)
+        form = QuizForm(request.POST, user=request.user)
         if form.is_valid():
-            form.save(commit=False)
             
-            return redirect("quiz:teacher_quiz_list")
+            quiz = form.save()
+            
+            
+            return render(request, 'quiz/partials/quiz/success_message.html')
+        else:
+            
+            return render(request, "quiz/partials/quiz/create.html", {"form": form})
+
+    
+    
+    form = QuizForm(user=request.user)
     return render(request, "quiz/partials/quiz/create.html", {"form": form})

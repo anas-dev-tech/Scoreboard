@@ -15,10 +15,6 @@ class Question(models.Model):
         related_name='quiz_questions'
     )    
     score = models.DecimalField(max_digits=4, decimal_places=2)
-    difficulty_level = models.SmallIntegerField(
-        choices=QuestionDifficulty.choices,
-        default=QuestionDifficulty.EASY
-    )
 
 
     def __str__(self):
