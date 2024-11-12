@@ -1,7 +1,8 @@
 # utils.py
 import pandas as pd
 from django.core.exceptions import FieldDoesNotExist
-
+import pdfplumber
+from pptx import Presentation
 
 
 
@@ -53,3 +54,20 @@ class ImportData(object):
         
         except Exception as e:
             raise ValueError(f"Error processing file: {e}")
+
+    def pdf_to_text(self):
+        text = ""
+        with pdfplumber.open(self.file) as pdf:
+            for page in pdf.pages:
+                text += page.extract_text()
+        return text
+
+    
+    def pptx_to_text(self):
+        text = ""
+        presentation = Presentation(self.file)
+        for slide in presentation.slides:
+            for shape in slide.shapes:
+                if hasattr(shape, "text"):
+                    text += shape.text + " "
+        return text

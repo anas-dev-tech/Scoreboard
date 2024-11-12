@@ -37,48 +37,10 @@
                         <div class="card-body">
                             <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link active"
-                                            id="pills-home-tab"
-                                            data-bs-toggle="pill"
-                                            data-bs-target="#pills-home"
-                                            type="button"
-                                            role="tab"
-                                            aria-controls="pills-home"
-                                            aria-selected="true">General</button>
+                                    <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">General</button>
                                 </li>
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link"
-                                            id="pills-question-list-tab"
-                                            data-bs-toggle="pill"
-                                            data-bs-target="#pills-question"
-                                            type="button"
-                                            role="tab"
-                                            aria-controls="pills-question"
-                                            aria-selected="false"
-                                            hx-get="{% url "quiz:list-question" quiz_id %}?page=1"
-                                            hx-target="#question-list"
-                                            hx-swap="innerHTML">Questions</button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link"
-                                            id="pills-contact-tab"
-                                            data-bs-toggle="pill"
-                                            data-bs-target="#pills-contact"
-                                            type="button"
-                                            role="tab"
-                                            aria-controls="pills-contact"
-                                            aria-selected="false">Contact</button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link"
-                                            id="pills-disabled-tab"
-                                            data-bs-toggle="pill"
-                                            data-bs-target="#pills-disabled"
-                                            type="button"
-                                            role="tab"
-                                            aria-controls="pills-disabled"
-                                            aria-selected="false"
-                                            disabled>Disabled</button>
+                                    <button class="nav-link" id="pills-question-tab" data-bs-toggle="pill" data-bs-target="#pills-question" type="button" role="tab" aria-controls="pills-question" aria-selected="false" hx-get="{% url 'quiz:list-question' quiz_id %}?page=1" hx-target="#question-list" hx-swap="innerHTML">Questions</button>
                                 </li>
                             </ul>
                             <div class="tab-content" id="pills-tabContent">
@@ -96,7 +58,7 @@
                                 <div class="tab-pane fade "
                                      id="pills-question"
                                      role="tabpanel"
-                                     aria-labelledby="pills-profile-tab"
+                                     aria-labelledby="pills-question-tab"
                                      tabindex="0">
                                     <div class="row">
                                         <div class="col-6">
@@ -124,6 +86,15 @@
                                                         hx-trigger="click"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#questionModal">Create Question</button>
+                                                        <button id="add-quiz-btn"
+                                                type="button"
+                                                class="btn btn-success"
+                                                hx-get="{% url 'quiz:create-quiz' %}"
+                                                hx-target="#questionModal .modal-content"
+                                                
+                                                hx-trigger="click"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#questionModal">Create Question</button>
                                                 <div class="btn-group" role="group">
                                                     <button type="button"
                                                             class="btn btn-success dropdown-toggle"
@@ -162,16 +133,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="tab-pane fade"
-                                     id="pills-contact"
-                                     role="tabpanel"
-                                     aria-labelledby="pills-contact-tab"
-                                     tabindex="0">...</div>
-                                <div class="tab-pane fade"
-                                     id="pills-disabled"
-                                     role="tabpanel"
-                                     aria-labelledby="pills-disabled-tab"
-                                     tabindex="0">...</div>
                             </div>
                         </div>
                         <!-- /.card-body -->
@@ -184,16 +145,5 @@
         </div>
         <!-- /.container-fluid -->
     </section>
-    <!-- Modal container (initially empty) -->
-    <div class="modal fade"
-         id="questionModal"
-         tabindex="-1"
-         aria-labelledby="questionModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <!-- Modal content will be dynamically loaded here by HTMX -->
-            </div>
-        </div>
-    </div>
+    {% include "include/modal_container.html" %}
 {% endblock content %}

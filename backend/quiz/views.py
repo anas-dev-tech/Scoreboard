@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, redirect
 from .models import Quiz, Question, QuestionOption
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .forms import QuizForm, QuestionOptionFormSet, QuestionForm
+from .forms import QuizForm, QuestionOptionFormSet, QuestionForm, QuizForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
@@ -185,3 +185,15 @@ def edit_question(request, quiz_id, question_id):
             "type": "edit",
         },
     )
+
+
+
+def create_quiz(request):
+    form = QuizForm()
+    if request.method == "POST":
+        form = QuizForm(request.POST)
+        if form.is_valid():
+            form.save(commit=False)
+            
+            return redirect("quiz:teacher_quiz_list")
+    return render(request, "quiz/partials/quiz/create.html", {"form": form})
