@@ -1,0 +1,43 @@
+<div class="col-12 table-responsive p-0">
+    <table class="table table-hover text-nowrap">
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Student Name</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for student in students %}
+      <tr>
+            <td>
+                <a 
+                  hx-get="{% url "academics:student_detail" student.id course_assignment.course.id %}"
+                  hx-target="#htmx-modal .modal-content"
+                  hx-swap="innerHTML"
+                  data-bs-toggle="modal"
+                  data-bs-target="#htmx-modal"
+                  class="text-decoration-none"
+                    >
+                    {{ student.id }}</a>
+            </td>
+            <td>{{ student.name }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div class="col-12">
+    {% if page_obj.has_previous %}
+    <button hx-get="{% url 'academics:student_list' course_assignment.id %}?page={{ page_obj.previous_page_number }}"
+            hx-target="#student-list"
+            hx-swap="innerHTML"
+            class="btn btn-secondary">Previous</button>
+{% endif %}
+<span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+{% if page_obj.has_next %}
+    <button hx-get="{% url 'academics:student_list' course_assignment.id %}?page={{ page_obj.next_page_number }}"
+            hx-target="#student-list"
+            hx-swap="innerHTML"
+            class="btn btn-primary">Next</button>
+{% endif %}
+</div>

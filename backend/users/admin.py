@@ -9,7 +9,7 @@ from django.shortcuts import render, redirect
 from django.urls import path
 from .models import Student
 from .forms import StudentImportForm
-from core.utils import ImportData
+from core.utils import import_data
 from icecream import ic
 
 User = get_user_model()
@@ -57,14 +57,15 @@ class UserAdmin(admin.ModelAdmin):
 class TeacherAdmin(admin.ModelAdmin):
     """Admin View for Teacher)"""
     list_display = ("user",)
-    list_per_page = 20
+    list_per_page = 10
+    search_fields = ['user__first_name', 'user__last_name']
 
 
 @admin.register(StudentGroup)
 class StudentGroupAdmin(admin.ModelAdmin):
     """Admin View for StudentGroup)"""
 
-    list_display = ("number", "major")
+    list_display = ("major", 'year_level', "number", )
     list_filter = ["major", "year_level"]
     list_per_page = 20
 
@@ -88,7 +89,7 @@ class StudentAdmin(admin.ModelAdmin):
                         "id": "id",
                         "name": "name",
                     }
-                    student_list = ImportData(file).excel_to_model_instances(
+                    student_list = import_data(file).excel_to_model_instances(
                         Student, excel_to_model_mappings
                     )
 

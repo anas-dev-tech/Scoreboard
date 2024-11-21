@@ -22,32 +22,24 @@
                 rowspan="1"
                 colspan="1"
                 aria-label="Platform(s): activate to sort column ascending">Score</th>
-            <th class="sorting"
-                tabindex="0"
-                aria-controls="example2"
-                rowspan="1"
-                colspan="1"
-                aria-label="Engine version: activate to sort column ascending">Difficulty Level</th>
         </tr>
     </thead>
     <tbody>
         {% for question in questions %}
             <tr class="{% cycle 'odd' 'even' %}">
                 <td  tabindex="0">
-                    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
                     <a href="#"
                         hx-get="{% url "quiz:edit-question" quiz_id question.id %}"
-                        hx-target=".modal-content"
+                        hx-target="#htmx-modal .modal-content"
                         hx-swap="innerHTML"
                         data-bs-toggle="modal"
-                        data-bs-target="#questionModal"
+                        data-bs-target="#htmx-modal"
                         >
                         {{ question.text }}
                 </a>
                 </td>
                 <td>{{ question.answer }}s</td>
                 <td>{{ question.score }}</td>
-                <td>{{ question.get_difficulty_level_display }}</td>
             </tr>
         {% endfor %}
     </tbody>

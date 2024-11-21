@@ -7,9 +7,6 @@ class AcademicYearQuerySet(models.QuerySet):
     def get_current_year(self):
         return self.filter(status=AcademicYearStatus.CURRENT).first()
 
-    def get_upcoming_year(self):
-        return self.filter(status=AcademicYearStatus.UPCOMING).first()
-
 
 
 
@@ -48,7 +45,7 @@ class AcademicYearManager(models.Manager):
 class AcademicYear(models.Model):
     start_year = models.IntegerField(help_text="Enter the starting year (e.g., 2023)")
     end_year = models.IntegerField(help_text="Enter the ending year (e.g., 2024)")
-    status = models.SmallIntegerField(choices=AcademicYearStatus.choices, default=AcademicYearStatus.UPCOMING)
+    status = models.SmallIntegerField(choices=AcademicYearStatus.choices, default=AcademicYearStatus.CURRENT)
     current_semester = models.SmallIntegerField(choices=Semester.choices, default=Semester.FIRST_SEMESTER)
 
     objects = AcademicYearManager.from_queryset(AcademicYearQuerySet)()
@@ -64,8 +61,7 @@ class AcademicYear(models.Model):
 
         if self.status == AcademicYearStatus.CURRENT and AcademicYear.objects.filter(status=AcademicYearStatus.CURRENT).exclude(pk=self.pk).exists():
             raise ValidationError("Only one academic year can be marked as current.")
-        elif self.status == AcademicYearStatus.UPCOMING and AcademicYear.objects.filter(status=AcademicYearStatus.UPCOMING).exclude(pk=self.pk).exists():
-            raise ValidationError("Only one academic year can be marked as upcoming.")
+        
 
     def finish_year(self):
         """Mark the current year as finished."""

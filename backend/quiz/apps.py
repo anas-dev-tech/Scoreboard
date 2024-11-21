@@ -7,3 +7,4 @@ class QuizConfig(AppConfig):
     
     def ready(self):
         import quiz.signals
+        import quiz.rules

@@ -1,7 +1,7 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
     <a href="#" class="brand-link">
-        <img src=""
+        <img src="https://via.assets.so/img.jpg?id=3&w=300&h=300&tc=blue&bg=#cecece"
              alt="ScoreBored Logo"
              class="brand-image img-circle elevation-3"
              style="opacity: .8">
@@ -16,37 +16,44 @@
                 role="menu"
                 data-accordion="false">
                 <!-- Add icons to the links using the .nav-icon class with font-awesome or any other icon font library -->
-                <li class="nav-header"></li>
-                <!-- Quezz -->
+                <li class="nav-header">
+                    <span style="font-weight: 600;">Course Assignments</span> 
+                </li>                <!-- Quizzes -->
+                
+                {% for course_assignment in courses_assignment %}
+                    <li class="nav-item">
+                        <a hx-get="{% url "academics:course_assignment_detail" course_assignment.id %}" hx-target="#htmx-content-block" class="nav-link">
+                        <span class="bg-white p-1 rounded-2">{{ course_assignment.student_group.major }}{{ course_assignment.student_group.year_level}}</span>
+                        &nbsp; &nbsp; {{ course_assignment.student_group.get_number_display }}
+                        </a>
+                    </li>
+                {% endfor %}
+                    
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a 
+                        hx-get="{% url "quiz:teacher_quiz_list" %}"
+                        hx-target="#htmx-content-block.content-wrapper"
+                        hx-swap="innerHTML"
+                        class="nav-link"
+                    >
                         <i class="nav-icon far fa-calendar-alt"></i>
                         <p>
-                            Quezzws
+                            Quizzes
                             <span class="badge badge-info right">2</span>
                         </p>
                     </a>
                 </li>
-                <!-- Results -->
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon far fa-calendar-alt"></i>
-                        <p>
-                            Results
-                            <span class="badge badge-info right">2</span>
-                        </p>
-                    </a>
+                <li class="nav-header">
+                    <span style="font-weight: 600;">Quizzes</span> 
                 </li>
-                <!-- Students -->
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon far fa-calendar-alt"></i>
-                        <p>
-                            Students
-                            <span class="badge badge-info right">2</span>
-                        </p>
-                    </a>
-                </li>
+                
+                {% for quiz in quizzes %}
+                    <li class="nav-item">
+                        <a href="{% url "quiz:quiz_detail" quiz.id %}" class="nav-link">
+                            {{ quiz.title }}
+                        </a>
+                    </li>
+                {% endfor %}
             </ul>
         </nav>
         <!-- /.sidebar-menu -->

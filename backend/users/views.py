@@ -1,29 +1,23 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.views import LoginView
-from django.views.generic import TemplateView
 from django.contrib.auth import login, authenticate, logout
 from django.urls import reverse_lazy
 from django.contrib.auth.views import PasswordChangeView
+from django.views.generic import TemplateView
 
 
 class UserLoginView(LoginView):
     template_name = 'users/auth/login.html'
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('quiz:teacher_quiz_list')
     
     
     
-class HomeView(TemplateView):
-    template_name = 'users/home.html'
-
-
+class HomePageView(TemplateView):
+    template_name = 'home.html'
     
-from django.shortcuts import redirect, render
-from django.contrib.auth import authenticate, login
 
 
 def user_login(request):
-    if request.user.is_authenticated:
-        return redirect('home')
 
     next_url = request.GET.get('next', 'home')  # Get the 'next' URL from the query string
     

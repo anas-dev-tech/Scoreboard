@@ -20,30 +20,13 @@
             <!-- Sidebar -->
             {% include "include/sidebar.html" %}
             <!--+Content+Wrapper.+Contains+page+content+-->
-            <div class="content-wrapper">
+
+            <div id="htmx-content-block" class="content-wrapper p-3">
                 {% block content %}
                 {% endblock content %}
             </div>
         </div>
 
         {% include "include/head_scripts.html" %}
-        <!-- Page specific script -->
-<script>
-    $(function () {
-      $("#example1").DataTable({
-        "responsive": true, "lengthChange": false, "autoWidth": false,
-        "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
-      }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-      $('#example2').DataTable({
-        "paging": true,
-        "lengthChange": false,
-        "searching": false,
-        "ordering": true,
-        "info": true,
-        "autoWidth": false,
-        "responsive": true,
-      });
-    });
-  </script>
     </body>
 </html>

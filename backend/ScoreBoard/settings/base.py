@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     # third-party apps
     'jazzmin',
     'django_htmx',
+    'rules',
+
     
     # default apps    
     'django.contrib.admin',
@@ -72,6 +74,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'academics.context_processors.get_all_courses_assignment',
+                'quiz.context_processors.get_all_quizzes',
             ],
         },
     },
@@ -139,7 +143,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.User'
 LOGOUT_REDIRECT_URL = 'login'
-LOGIN_REDIRECT_URL = 'home'
+# LOGIN_REDIRECT_URL = ''
 
 LOGIN_URL = 'login'
 
+# Add configuration for django-rules
+AUTHENTICATION_BACKENDS = (
+    'rules.permissions.ObjectPermissionBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)

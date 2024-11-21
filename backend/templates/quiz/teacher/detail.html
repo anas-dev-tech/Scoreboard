@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}
+    Quiz Update
+{% endblock title %}
+{% block content %}
+    <div class="app-content-header">
+        <!--begin::Container-->
+        <div class="container-fluid">
+            <!--begin::Row-->
+            <div class="row">
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-end">
+                        <li class="breadcrumb-item">
+                            <a href="#">Home</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">Update quiz</li>
+                    </ol>
+                </div>
+            </div>
+            <!--end::Row-->
+        </div>
+        <!--end::Container-->
+    </div>
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card card-primary card-outline card-outline-tabs">
+                        <div class="card-header p-0 border-bottom-0">
+                          <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                              <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" id="pills-question-tab" data-bs-toggle="pill" data-bs-target="#pills-question" type="button" role="tab" aria-controls="pills-question" aria-selected="false" hx-get="{% url 'quiz:list-question' quiz.id %}?page=1" hx-target="#question-list" hx-swap="innerHTML">Questions</button>
+                            </li>
+                          </ul>
+                        </div>
+                        <div class="card-body">
+                          <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <form action="" method="post">
+                                    {% csrf_token %}
+                                    {{ form.as_p }}
+                                    <button type="submit">
+                                        Update
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="tab-pane fade" id="pills-question" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                                <div class="row">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div id="example1_filter" class="dataTables_filter">
+                                                <div class="input-group mb-3">
+                                                    <span class="input-group-text" id="basic-addon1"><i class="bi bi-search"></i></span>
+                                                    <input type="text"
+                                                           class="form-control"
+                                                           placeholder="Search"
+                                                           aria-label="Search"
+                                                           aria-describedby="basic-addon1">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <!-- create question Btn -->
+                                            <div 
+                                                class="btn-group"
+                                                role="group"
+                                                aria-label="Button group with nested dropdown">
+                                                <button id="add-question-btn"
+                                                        type="button"
+                                                        class="btn btn-success"
+                                                        hx-get="{% url 'quiz:create-question' quiz.id %}"
+                                                        hx-target="#htmx-modal .modal-content"
+                                                        hx-trigger="click"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#htmx-modal">Create Question</button>
+                                                        
+                                                <div class="btn-group" role="group">
+                                                    <button type="button"
+                                                            class="btn btn-success dropdown-toggle"
+                                                            data-bs-toggle="dropdown"
+                                                            aria-expanded="false"></button>
+                                                    <ul class="dropdown-menu">
+                                                        <li>
+                                                            <a 
+                                                            class="dropdown-item" href="#"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="">Manually</a>
+                                                        </li>
+                                                        <li>
+                                                            <a 
+                                                                hx-get="{% url "quiz:create-question-AI" quiz.id %}"
+                                                                hx-target="#htmx-modal .modal-content"
+                                                                hx-swap="innerHTML"
+                                                                hx-trigger="click"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#htmx-modal"
+                                                                class="dropdown-item" href="#">By AI </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div id="question-list" class="col-12">
+                                        #SECTION - Quiz question will be dynamically uploaded here by htmx - AJAX tech
+                                    </div>
+                                </div>                            </div>
+                        </div>
+                        </div>
+                        <!-- /.card -->
+                    </div>
+                    
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    {% include "include/htmx_modal.html" %}
+{% endblock content %}

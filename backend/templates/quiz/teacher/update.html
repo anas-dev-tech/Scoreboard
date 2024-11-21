@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}
-    Quiz List
+    Quiz Update
 {% endblock title %}
 {% block content %}
     <div class="app-content-header">
@@ -9,14 +9,14 @@
             <!--begin::Row-->
             <div class="row">
                 <div class="col-sm-6">
-                    <h3 class="mb-0">Simple Tables</h3>
+                    <h3 class="mb-0">Update quiz</h3>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-end">
                         <li class="breadcrumb-item">
                             <a href="#">Home</a>
                         </li>
-                        <li class="breadcrumb-item active" aria-current="page">Simple Tables</li>
+                        <li class="breadcrumb-item active" aria-current="page">Update quiz</li>
                     </ol>
                 </div>
             </div>
@@ -82,10 +82,10 @@
                                                         type="button"
                                                         class="btn btn-success"
                                                         hx-get="{% url 'quiz:create-question' quiz_id %}"
-                                                        hx-target="#questionModal .modal-content"
+                                                        hx-target="#htmx-modal .modal-content"
                                                         hx-trigger="click"
                                                         data-bs-toggle="modal"
-                                                        data-bs-target="#questionModal">Create Question</button>
+                                                        data-bs-target="#htmx-modal">Create Question</button>
                                                         
                                                 <div class="btn-group" role="group">
                                                     <button type="button"
@@ -94,10 +94,20 @@
                                                             aria-expanded="false"></button>
                                                     <ul class="dropdown-menu">
                                                         <li>
-                                                            <a class="dropdown-item" href="#">Dropdown link</a>
+                                                            <a 
+                                                            class="dropdown-item" href="#"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="">Manually</a>
                                                         </li>
                                                         <li>
-                                                            <a class="dropdown-item" href="#">Dropdown link</a>
+                                                            <a 
+                                                                hx-get="{% url "quiz:create-question-AI" quiz_id %}"
+                                                                hx-target="#htmx-modal .modal-content"
+                                                                hx-swap="innerHTML"
+                                                                hx-trigger="click"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#htmx-modal"
+                                                                class="dropdown-item" href="#">By AI </a>
                                                         </li>
                                                     </ul>
                                                 </div>
@@ -106,22 +116,7 @@
                                     </div>
                                     <div class="row">
                                         <div id="question-list" class="col-12">
-                                            {% include "quiz/include/question_list.html" with questions=questions %}
-                                            <div class="pagination-controls">
-                                                {% if page_obj.has_previous %}
-                                                    <button hx-get="{% url 'quiz:list-question' quiz_id %}?page={{ page_obj.previous_page_number }}"
-                                                            hx-target="#question-list"
-                                                            hx-swap="innerHTML"
-                                                            class="btn btn-secondary">Previous</button>
-                                                {% endif %}
-                                                <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-                                                {% if page_obj.has_next %}
-                                                    <button hx-get="{% url 'quiz:list-question' quiz_id %}?page={{ page_obj.next_page_number }}"
-                                                            hx-target="#question-list"
-                                                            hx-swap="innerHTML"
-                                                            class="btn btn-primary">Next</button>
-                                                {% endif %}
-                                            </div>
+                                            #SECTION - Quiz question will be dynamically uploaded here by htmx - AJAX tech
                                         </div>
                                     </div>
                                 </div>

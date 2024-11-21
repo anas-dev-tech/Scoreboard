@@ -1,0 +1,16 @@
+{% include "quiz/include/question_list.html" with questions=page_obj %}
+<div class="pagination-controls">
+    {% if page_obj.has_previous %}
+        <button hx-get="{% url 'quiz:list-question' quiz_id %}?page={{ page_obj.previous_page_number }}"
+                hx-target="#question-list"
+                hx-swap="innerHTML"
+                class="btn btn-secondary">Previous</button>
+    {% endif %}
+    <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <button hx-get="{% url 'quiz:list-question' quiz_id %}?page={{ page_obj.next_page_number }}"
+                hx-target="#question-list"
+                hx-swap="innerHTML"
+                class="btn btn-primary">Next</button>
+    {% endif %}
+</div>

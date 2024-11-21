@@ -1,6 +1,6 @@
 from django.db import models
 from users.models import Student
-from academics.models import Syllabus
+from academics.models import CourseAssignment
 from .question import Question, QuestionOption
 from core.constants import QuizStudentStatus
 
@@ -11,7 +11,7 @@ class QuizStudent(models.Model):
     )
     
     syllabus = models.ForeignKey(
-        Syllabus,
+        CourseAssignment,
         on_delete=models.CASCADE,
     )
     

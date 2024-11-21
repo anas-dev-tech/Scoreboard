@@ -1,4 +1,5 @@
 from .academic_year import AcademicYear
-from .course import Course
+from .course import Course, GradeType
 from .major import Major
-from .syllabus import Syllabus
+from .course_assignments import CourseAssignment
+from .grade import  Grade, GradeDetail

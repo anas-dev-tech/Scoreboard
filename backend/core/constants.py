@@ -15,6 +15,7 @@ class YearLevel(IntegerChoices):
     THIRD_YEAR = 3, 'Third Year'
     FOURTH_YEAR = 4, 'Fourth Year'
     FIFTH_YEAR = 5, 'Fifth Year'
+    GRADUATED = 6, 'Graduated'
 
 
 class Gender(IntegerChoices):
@@ -41,7 +42,6 @@ class QuestionDifficulty(IntegerChoices):
 class AcademicYearStatus(IntegerChoices):
     FINISHED = 1, 'FINISHED'
     CURRENT = 2, 'CURRENT'
-    UPCOMING = 3, 'Upcoming'
 
 class QuizSessionStatus(IntegerChoices):
     LIVE = 1, 'Live'
@@ -69,4 +69,15 @@ class StudentGroupNumber(IntegerChoices):
     GROUP_3 = 3, 'Group 3'
     GROUP_4 = 4, 'Group 4'
     GROUP_5 = 5, 'Group 5'
+
+
+class ResultType(IntegerChoices):
+    QUIZ = 1, 'Quiz'
+    NON_QUIZ = 2, 'Non-quiz' 
+
+class GradeStatus(IntegerChoices):
+    PUBLISHED = 1, 'Published'
+    DRAFT = 2, 'Draft'
+    READY = 3, 'Ready'
+    AGGREGATED = 4, 'Aggregated'
     

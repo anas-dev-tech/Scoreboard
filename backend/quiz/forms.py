@@ -4,7 +4,9 @@ from core.constants import QuizStatus
 from icecream import ic
 from django.forms.models import inlineformset_factory
 from django.forms import BaseInlineFormSet
-from academics.models import Syllabus
+from academics.models import CourseAssignment
+from django.utils.safestring import mark_safe
+
 
 class ExistingQuizForm(forms.ModelForm):
     quiz = forms.ModelChoiceField(
@@ -95,55 +97,56 @@ class QuestionOptionInlineFormSet(BaseInlineFormSet):
 
 
 class QuizForm(forms.ModelForm):
-    def __init__(self, *args, user=None,**kwargs):
-        super().__init__(*args, **kwargs)
-        self.user = user
-        # Optionally, you can set initial values or limit choices based on `user`
-        if self.user:
-            teacher_syllabi = Syllabus.objects.filter(teacher=self.user.teacher)
+    # def __init__(self, *args, user=None,**kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.user = user
+    #     # Optionally, you can set initial values or limit choices based on `user`
+    #     if self.user:
+    #         teacher_syllabi = CourseAssignment.objects.filter(teacher=self.user.teacher)
 
-            # Step 2: Exclude syllabi that are already associated with other quizzes
-            excluded_syllabi = Syllabus.objects.filter(quizzes_for_this_syllabus__isnull=False).distinct()
+    #         # Step 2: Exclude syllabi that are already associated with other quizzes
+    #         excluded_syllabi = CourseAssignment.objects.filter(quizzes__isnull=False).distinct()
 
-            # Step 3: Initialize the available syllabi, excluding those in other quizzes
-            available_syllabi = teacher_syllabi.exclude(id__in=excluded_syllabi)
+    #         # Step 3: Initialize the available syllabi, excluding those in other quizzes
+    #         available_syllabi = teacher_syllabi.exclude(id__in=excluded_syllabi)
 
-            # Step 4: If in update mode, add existing values back to the queryset
-            if self.instance.pk:
-                # Get the syllabi already associated with this quiz
-                current_quiz_syllabi = self.instance.quiz_for.all()
+    #         # Step 4: If in update mode, add existing values back to the queryset
+    #         if self.instance.pk:
+    #             # Get the syllabi already associated with this quiz
+    #             current_quiz_syllabi = self.instance.courses.all()
                 
-                # Include these syllabi in the available queryset
-                available_syllabi = available_syllabi | current_quiz_syllabi
+    #             # Include these syllabi in the available queryset
+    #             available_syllabi = available_syllabi | current_quiz_syllabi
 
-            # Set the queryset for `quiz_for` field
-            self.fields['quiz_for'].queryset = available_syllabi
+    #         # Set the queryset for `courses` field
+    #         self.fields['course_assignments'].queryset = available_syllabi
             
             
-    def clean_quiz_for(self):
-        selected_syllabi = self.cleaned_data.get('quiz_for')
+    # def clean_courses(self):
+    #     selected_syllabi = self.cleaned_data.get('course_assignments')
         
-        # Check each syllabus to enforce validation
-        for syllabus in selected_syllabi:
-            # Condition 1: Ensure syllabus belongs to the teacher
-            if syllabus.teacher != self.user.teacher:
-                raise ValidationError(f"The syllabus {syllabus} does not belong to the current teacher.")
+    #     # Check each syllabus to enforce validation
+    #     for syllabus in selected_syllabi:
+    #         # Condition 1: Ensure syllabus belongs to the teacher
+    #         if syllabus.teacher != self.user.teacher:
+    #             raise ValidationError(f"The syllabus {syllabus} does not belong to the current teacher.")
             
-            # Condition 2: Ensure syllabus is not already linked to another quiz (if in create mode)
-            if not self.instance.pk and syllabus.quizzes_for_this_syllabus.exists():
-                raise ValidationError(f"The syllabus {syllabus} is already associated with another quiz.")
+    #         # Condition 2: Ensure syllabus is not already linked to another quiz (if in create mode)
+    #         if not self.instance.pk and syllabus.quizzes.exists():
+    #             raise ValidationError(f"The syllabus {syllabus} is already associated with another quiz.")
 
-        return selected_syllabi
+    #     return selected_syllabi
     class Meta:
         model = Quiz
         fields = (
             "title",
             "number_of_questions",
-            "quiz_for",
             "is_randomized",
             "status",
         )
-        
+
+
+
 
 class QuestionForm(forms.ModelForm):
     class Meta:
@@ -189,3 +192,21 @@ QuestionOptionFormSet = forms.inlineformset_factory(
     max_num=4,
     extra=2,
 )
+
+
+class UploadFileAIForm(forms.Form):
+    file = forms.FileField(
+        help_text=mark_safe('''<br>
+                            <small>
+                                <span style="color: red;">*</span> Only PDF and PPTX files are supported.
+                            </small>
+                            ''')
+    )
+    question_number = forms.IntegerField(min_value=1, label="Number of Questions")
+    
+    
+    def clean_file(self):
+        file = self.cleaned_data.get('file', )
+        
+        if not file.name.endswith(('.pdf', 'pptx')):
+            raise forms.ValidationError("Only PDF and PPTX files are supported in this app.")

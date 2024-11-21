@@ -1,9 +1,6 @@
 from django.db import models
 
 
-
-
-
 class Major(models.Model):
     '''Model definition for Major.'''    
     name = models.CharField(max_length=50)
@@ -11,7 +8,6 @@ class Major(models.Model):
     
     class Meta:
         '''Meta definition for Major.'''
-
         verbose_name = 'Major'
         verbose_name_plural = 'Majors'
 

@@ -1,7 +1,7 @@
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
 from .models import Quiz
-from academics.models import Syllabus
+from academics.models import CourseAssignment
 from django.core.exceptions import ValidationError
 
 # @receiver(m2m_changed, sender=Quiz.quiz_for.through)

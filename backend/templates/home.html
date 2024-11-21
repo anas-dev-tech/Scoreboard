@@ -1,7 +1,90 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}
     hey
 {% endblock title %}
 {% block content %}
-    Hello
-{% endblock content %}
+
+<script defer src="{% static 'js/try.js' %}"></script>
+{% comment %}     
+    <div x-data="{name:'<span>Anas</span>'}">
+        <h1 x-html="name"></h1>
+         
+    </div>
+
+    <div 
+        x-data
+        x-text="await (await fetch('https://jsonplaceholder.typicode.com/todos/2')).text()"></div> {% endcomment %}
+{% comment %} 
+    <div 
+        x-data="{
+            message:'click to change', 
+            change(){
+                this.message = 'Changed message'
+            }
+        }">
+
+        <span x-text="message" @click="change()"></span>
+    </div>
+
+    <div x-data="{
+        open: false,
+        toggle(){
+            this.open = !this.open
+        }
+    }">
+        <button @click="toggle()">Open/Close</button>
+        <div x-show="open">
+            <p>This is the content</p>
+    
+    </div> {% endcomment %}
+
+    <div x-data x-text="$store.currentUser.email"></div>
+{% comment %} 
+    <div 
+        x-data="{todo:{}}" 
+        x-init="todo = await (await fetch('https://jsonplaceholder.typicode.com/todos/2')).json()"
+    >
+
+        <h1 x-text="todo.title"></h1>
+        <p x-text="todo.completed"></p>
+
+    </div> {% endcomment %}
+    
+    {% comment %} <div x-data="{
+        name:'Zura'
+    }">
+    
+        <div x-data="{name: 'Ali'}">
+            <h1 x-text="name"></h1>
+            <h1 x-text="$parent.name"></h1>
+        </div>
+    </div> {% endcomment %}
+{% comment %} 
+    <div x-data="{
+        open:false,
+        toggle(){
+            this.open = !this.open
+        }
+        
+        
+    }">
+        <button @click="open = ! open">Open</button>
+
+        <div 
+            x-show="open"
+            x-transition
+            x-transition:enter.start.duration.1000ms
+            x-transition:enter.end.duration.100ms
+            x-transition:leave.duration.100ms
+        >
+            <p>This is the content</p>
+
+    </div> {% endcomment %}
+
+    <div x-data="{modal: false}">
+        <button @click="modal = true">Open</button>
+        <div x-show="modal" x-transition @click.outside="modal = false">
+            <p>This is the content</p>
+    </div>
+    {% endblock content %}

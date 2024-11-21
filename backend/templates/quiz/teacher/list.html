@@ -37,18 +37,17 @@
                         <div class="card-body">
                             <div id="example1_wrapper" class="dataTables_wrapper dt-bootstrap4">
                                 <div class="row">
-                                    <script src="https://unpkg.com/htmx.org@2.0.3" integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" crossorigin="anonymous"></script>
 
                                     <div class="col-sm-12 col-md-6">
                                         <button id="add-quiz-btn"
                                                 type="button"
                                                 class="btn btn-success"
                                                 hx-get="{% url 'quiz:create-quiz' %}"
-                                                hx-target="#questionModal .modal-content"
+                                                hx-target="#htmx-modal .modal-content"
 
                                                 hx-trigger="click"
                                                 data-bs-toggle="modal"
-                                                data-bs-target="#questionModal">Create Quiz</button>
+                                                data-bs-target="#htmx-modal">Create Quiz</button>
                                         
                                     </div>
                                     <div class="col-sm-12 col-md-6">

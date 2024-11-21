@@ -1,4 +1,13 @@
-from transformers import pipeline
+import pdfplumber
 
-# Initialize the question-generation pipeline (customize with fine-tuned model if available)
-question_generator = pipeline("question-generation", model="t5-small")
+file_path = "123.pdf"
+
+def pdf_to_text():
+        text = ""
+        with pdfplumber.open(file_path) as pdf:
+            for page in pdf.pages:
+                text += page.extract_text()
+        return text
+    
+    
+print(pdf_to_text())

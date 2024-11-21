@@ -5,10 +5,21 @@ from django.shortcuts import get_object_or_404, redirect
 from .models import Quiz, Question, QuestionOption
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .forms import QuizForm, QuestionOptionFormSet, QuestionForm, QuizForm
+from .forms import (
+    QuizForm,
+    QuestionOptionFormSet,
+    QuestionForm,
+    QuizForm,
+    UploadFileAIForm,
+)
+from core.utils import ImportData
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required
 from icecream import ic
+import time
+from rules.contrib.views import permission_required, objectgetter
+
+
 
 
 class TeacherUserMixin:
@@ -45,6 +56,18 @@ class QuizTeacherListView(LoginRequiredMixin, QuizTeacherMixin, ListView):
     context_object_name = "quizzes"
 
 
+
+def list_quiz(request):
+    teacher = request.user.teacher
+    quizzes = Quiz.objects.filter(course_assignments__teacher=teacher)
+
+    if request.htmx:
+        ic("it is htmx")
+        return render(request, "quiz/partials/quiz/list.html", {"quizzes": quizzes})
+    
+    return render(request, "quiz/teacher/list.html", {"quizzes": quizzes})
+
+
 class QuizTeacherUpdateView(LoginRequiredMixin, QuizTeacherMixin, ListView, UpdateView):
     model = Quiz
     template_name = "quiz/teacher/update.html"
@@ -58,23 +81,35 @@ class QuizTeacherUpdateView(LoginRequiredMixin, QuizTeacherMixin, ListView, Upda
         "is_randomized",
     ]
 
-@login_required
 def update_quiz(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id)
     form = QuizForm(user=request.user)
     if request.method == "POST":
-        form = QuizForm(request.POST,user=request.user , instance=quiz)
+        form = QuizForm(request.POST, user=request.user, instance=quiz)
         if form.is_valid():
             form.save()
             return redirect("quiz:teacher_quiz_list")
     else:
         form = QuizForm(user=request.user, instance=quiz)
-        questions = quiz.quiz_questions.all()
+        context = {"form": form, "quiz_id": quiz_id}
+
+    if request.htmx:
+        return render(request, "quiz/partials/quiz/update.html", context)
     return render(
         request,
         "quiz/teacher/update.html",
-        {"form": form, "questions": questions, "quiz_id": ic(quiz.id)},
+        context,
     )
+
+def quiz_detail(request, quiz_id):
+    quiz = get_object_or_404(Quiz, id=quiz_id)
+    quiz_form = QuizForm(instance=quiz)
+    questions = quiz.quiz_questions.all()
+    context = {"quiz": quiz, 'form':quiz_form, "questions": questions}
+    return render(request, "quiz/teacher/detail.html", context)
+
+def upload_file_ai(request, quiz_id):
+    quiz = get_object_or_404(Quiz, id=quiz_id)
 
 @login_required
 def create_question(request, quiz_id):
@@ -98,7 +133,7 @@ def create_question(request, quiz_id):
 
         return render(
             request,
-            "partials/question_form.html",
+            "quiz/partials/question/form.html",
             {"form": form, "formset": formset, "quiz_id": quiz_id},
         )
 
@@ -107,9 +142,10 @@ def create_question(request, quiz_id):
     formset = QuestionOptionFormSet()
     return render(
         request,
-        "partials/question_form.html",
+        "quiz/partials/question/form.html",
         {"form": form, "formset": formset, "quiz_id": quiz_id},
     )
+
 
 @login_required
 def question_list(request, quiz_id):
@@ -129,6 +165,7 @@ def question_list(request, quiz_id):
             {"page_obj": page_obj, "quiz_id": quiz_id},
         )
 
+
 @login_required
 def edit_question(request, quiz_id, question_id):
     quiz = get_object_or_404(Quiz, pk=quiz_id)
@@ -145,7 +182,7 @@ def edit_question(request, quiz_id, question_id):
             # Return a response for HTMX to confirm form saved and reload the modal content
             return render(
                 request,
-                "partials/question_form.html",
+                "quiz/partials/question/form.html",
                 {
                     "form": form,
                     "formset": formset,
@@ -159,7 +196,7 @@ def edit_question(request, quiz_id, question_id):
             # Provide error feedback to user if form is not valid
             return render(
                 request,
-                "partials/question_form.html",
+                "quiz/partials/question/form.html",
                 {
                     "form": form,
                     "formset": formset,
@@ -175,7 +212,7 @@ def edit_question(request, quiz_id, question_id):
 
     return render(
         request,
-        "partials/question_form.html",
+        "quiz/partials/question/form.html",
         {
             "form": form,
             "formset": formset,
@@ -191,16 +228,81 @@ def create_quiz(request):
     if request.method == "POST":
         form = QuizForm(request.POST, user=request.user)
         if form.is_valid():
-            
+
             quiz = form.save()
-            
-            
-            return render(request, 'quiz/partials/quiz/success_message.html')
+
+            return render(request, "quiz/partials/quiz/success_message.html")
         else:
-            
+
             return render(request, "quiz/partials/quiz/create.html", {"form": form})
 
-    
-    
     form = QuizForm(user=request.user)
     return render(request, "quiz/partials/quiz/create.html", {"form": form})
+
+import google.generativeai as genai
+
+import random
+
+def generate_question():
+    topics = ["Science", "History", "Geography", "Technology", "Sports"]
+    topic = random.choice(topics)
+
+    question = f"What is the capital of {topic}?"
+
+    correct_answer = {
+        "Science": "Discovery",
+        "History": "Change",
+        "Geography": "Location",
+        "Technology": "Innovation",
+        "Sports": "Competition"
+    }[topic]
+
+    incorrect_answers = [
+        "Failure",
+        "Stagnation",
+        "Isolation",
+        "Regression"
+    ]
+    random.shuffle(incorrect_answers)
+
+    all_answers = [correct_answer] + incorrect_answers
+    random.shuffle(all_answers)
+
+    return question, all_answers
+
+
+def create_question_AI(request, quiz_id):
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
+    genai.configure(api_key="AIzaSyAWU8HmDsfMk96vMaio3nd4id2BwCVKbH4")
+    model = genai.GenerativeModel('gemini-1.5-flash-latest')
+
+
+    if request.method == "POST":
+        form = UploadFileAIForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            file = request.FILES.get('file', None)
+            question_number = form.cleaned_data["question_number"]
+        
+            if file.name.endswith(".pdf"):
+                text_data = ImportData(file).pdf_to_text()
+            
+            if file.name.endswith(".pptx"):
+                text_data = ImportData(file).pptx_to_text()
+                
+            
+            time.sleep(10)
+
+            return render(request, 'quiz/partials/question/AI/receive.html', {"message":text_data})
+        
+        ic("not valid_form")
+        
+        return render(request, "quiz/partials/question/AI/submit.html", {"form": form, "quiz_id": quiz_id})
+        
+    else:
+        form = UploadFileAIForm()
+        return render(
+            request,
+            "quiz/partials/question/AI/submit.html",
+            {"form": form, "quiz_id": quiz_id},
+        )

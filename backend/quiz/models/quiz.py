@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from academics.models import Syllabus
+from academics.models import CourseAssignment
 from core.constants import QuizStatus, AcademicYearStatus
 from .quiz_session import QuizSession
 from icecream import ic
@@ -9,7 +9,7 @@ from icecream import ic
 class QuizQuerySet(models.QuerySet):
     def create_quizzes_for_syllabuses(self, syllabus_ids):
         # Fetch selected syllabuses
-        syllabuses = Syllabus.objects.filter(id__in=syllabus_ids)
+        syllabuses = CourseAssignment.objects.filter(id__in=syllabus_ids)
         quizzes = []
         
         for syllabus in syllabuses:
@@ -50,7 +50,7 @@ class QuizQuerySet(models.QuerySet):
             quiz.save()
             published_quizzes.append(quiz)
     def get_quizzes_for_teacher(self, teacher_id):
-        syllabuses = Syllabus.objects.filter(teacher__id=teacher_id)
+        syllabuses = CourseAssignment.objects.filter(teacher__id=teacher_id)
         ic(syllabuses)
         
         teacher_quizzes = self.filter(quiz_for__in=syllabuses)
@@ -63,7 +63,7 @@ class Quiz(models.Model):
     time = models.IntegerField(default=90)
     number_of_questions = models.IntegerField(default=20, blank=True)
     required_score_to_pass = models.IntegerField(default=50)
-    quiz_for = models.ManyToManyField(Syllabus, related_name='quizzes_for_this_syllabus')
+    course_assignments = models.ManyToManyField(CourseAssignment, related_name='quizzes')
     is_randomized = models.BooleanField(default=False)
     quiz_session = models.ForeignKey(QuizSession, on_delete=models.CASCADE, related_name='quizzes', null=True, blank=True)
     status = models.SmallIntegerField(choices=QuizStatus.choices, default=QuizStatus.DRAFT)

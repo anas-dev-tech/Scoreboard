@@ -1,18 +1,24 @@
 from django.apps import apps
-from .constants import Role, Semester, QuestionType, QuestionDifficulty
+from .constants import Role, Semester, QuestionType, QuestionDifficulty, YearLevel, StudentGroupNumber
 from faker import Faker
 import random
+from icecream import ic
+
 
 StudentGroup = apps.get_model('users', 'StudentGroup')
 Course = apps.get_model('academics', 'Course')
 Teacher = apps.get_model('users', 'Teacher')
 AcademicYear = apps.get_model('academics', 'AcademicYear')
-Syllabus = apps.get_model('academics', 'Syllabus')
+Syllabus = apps.get_model('academics', 'CourseAssignment')
 Quiz = apps.get_model('quiz', 'Quiz')
 Question = apps.get_model('quiz', 'Question')
 QuestionOption = apps.get_model('quiz', 'QuestionOption')
+Major = apps.get_model('academics', 'Major')
+Student = apps.get_model('users', 'Student')
 
-def generate_course_data():
+
+
+def fake_data_for_course():
     courses = [
         # IT Courses
         "Introduction to Information Systems",
@@ -71,24 +77,36 @@ def generate_course_data():
 
     # Assuming you have a Course model with fields 'name' and 'category'
     Course = apps.get_model('academics', 'Course')
-
+    majors = Major.objects.all()
     for course_name in courses:
-        Course.objects.create(name=course_name)
+        major=random.choice(majors)
         
-
-def generate_fake_data_for_student(group_id, num_records=100):
-    fake = Faker()
-    Student = apps.get_model('users', 'Student')
-    group = StudentGroup.objects.get(id=group_id)
-    for _ in range(num_records):
-        Student.objects.create(
-            id=fake.unique.random_number(digits=10),
-            name=fake.name(),
-            group=group,
+        Course.objects.create(
+            name=course_name,
+            year_level=random.choice(YearLevel.choices)[0],
+            major=major
         )
         
 
-def generate_fake_data_for_teacher(num_users=10):
+def fake_data_for_student(num_records=100, group_id=None):
+    fake = Faker()
+    if group_id is None:
+        student_groups = StudentGroup.objects.all()
+    else:
+        student_groups = StudentGroup.objects.filter(id=group_id)
+        
+        
+    
+    for _ in range(num_records):
+        for group in student_groups:
+            Student.objects.create(
+                id=fake.unique.random_number(digits=10),
+                name=fake.name(),
+                group=group,
+            )
+        
+
+def fake_data_for_teacher(num_users=10):
     fake = Faker()
     User = apps.get_model('users', 'User')
     Teacher = apps.get_model('users', 'Teacher')
@@ -97,12 +115,13 @@ def generate_fake_data_for_teacher(num_users=10):
             first_name = fake.first_name(),
             last_name = fake.last_name(),
             email=fake.email(),
-            role=Role.TEACHER.value[0] # Get the key from choices tuple
+            role=Role.TEACHER # Get the key from choices tuple
         )
         user.set_password('Anas775995183')
         user.save()
+        print('user:', user)
 
-def generate_fake_data_for_syllabus(num_records=10):
+def fake_data_for_syllabus(num_records=10):
     """Populates the Syllabus model with fake data, selecting from existing foreign key objects."""
 
     fake = Faker()
@@ -119,7 +138,7 @@ def generate_fake_data_for_syllabus(num_records=10):
             # Create a new Syllabus object
             syllabus = Syllabus.objects.create(
                 student_group=student_group,
-                subject=course,
+                course=course,
                 teacher=teacher,
                 academic_year=academic_year,
                 semester=semester,
@@ -132,56 +151,8 @@ def generate_fake_data_for_syllabus(num_records=10):
 
 
 
-def generate_fake_data_for_quiz_data(question_num, quiz_ids=[]):
-    faker = Faker()
-
-    # Generate fake quizzes
-    quizzes = []
-    for _ in range(5):
-        quiz = Quiz.objects.all(title=faker.sentence())
-        quizzes.append(quiz)
-
-    # Generate fake questions and options
-    for _ in range(20):
-        quiz = random.choice(quizzes)
-        question_text = faker.sentence(nb_words=10)
-        question_type = random.choice([QuestionType.TRUE_OR_FALSE, QuestionType.MULTIPLE_CHOICE])
-        question_difficulty = random.choice([QuestionDifficulty.EASY, QuestionDifficulty.MEDIUM, QuestionDifficulty.HARD])
-        score = round(random.uniform(0.5, 10.0), 2)
-
-        question = Question.objects.create(
-            text=question_text,
-            quiz=quiz,
-            score=score,
-            question_difficulty=question_difficulty,
-            question_type=question_type
-        )
-
-        # Generate fake options for the question
-        correct_option = None
-        for _ in range(4):
-            option_text = faker.sentence(nb_words=5)
-            if question_type == QuestionType.TRUE_OR_FALSE:
-                option = QuestionOption.objects.create(
-                question=question,
-                text=option_text
-            )
-            if is_correct or correct_option is None:
-                correct_option = option
-
-        # Set the correct answer for the question
-        question.answer = correct_option
-        question.save()
 
 
-import os
-import django
-from faker import Faker
-import random
-
-# Set up Django environment
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'your_project.settings')
-django.setup()
 
 
 def generate_fake_data_for_quizzes(q_num):
@@ -224,3 +195,51 @@ def generate_fake_data_for_quizzes(q_num):
 
         print(f'Quiz "{quiz.title}" populated with questions and options.')
 
+
+def fake_data_for_student_group():
+    """Populates the StudentGroup model with fake data."""
+    # Create fake data for StudentGroup
+    majors = Major.objects.all()
+    for major in majors:
+        for year_level in range(1,5):
+            for group_number in range(1,4):
+                for type in range(1,4):
+                    try:
+                        StudentGroup.objects.create(
+                            major=major,
+                            year_level=year_level,
+                            number=group_number,
+                                education_type=type
+                                )
+                        # Print the created StudentGroup object
+                        print(f"Created StudentGroup: {StudentGroup}")
+                    except Exception as e:
+                        print(f"Error creating StudentGroup: {e}")
+
+
+def fake_data_for_syllabus(syllabus_num):
+    course = Course.objects.all()
+    teacher = Teacher.objects.all()
+    student_groups = StudentGroup.objects.all()
+    
+    for student_group in student_groups:
+        try:
+            # Generate random data for the Syllabus object
+            ic(course)
+            course = course.filter(major=student_group.major, year_level=student_group.year_level)
+            course = random.choice(course)
+            teacher = random.choice(teacher)
+            
+            # Create the Syllabus object
+            syllabus = Syllabus.objects.create(
+                course=course,
+                teacher=teacher,
+                student_group=student_group
+            )
+            syllabus.save()
+            
+            print(f"Created Syllabus: {syllabus}")
+        except Exception as e:
+            print(f"Error creating Syllabus: {e}")
+            
+            

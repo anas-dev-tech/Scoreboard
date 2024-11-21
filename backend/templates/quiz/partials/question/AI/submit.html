@@ -1,0 +1,49 @@
+<div class="modal-header">
+    <h5 class="modal-title">Modal title</h5>
+    <button type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"></button>
+</div>
+
+<div class="modal-body">
+    <div id="question-errors">
+        {% if errors %}<div class="alert alert-danger">{{ errors }}</div>{% endif %}
+    </div>
+    <form
+        id="upload-file-AI-form"
+        enctype="multipart/form-data"
+        hx-post="{% url "quiz:create-question-AI" quiz_id %}" 
+        hx-target="#htmx-modal .modal-content "
+        hx-swap="innerHTML"
+        hx-indicator="#loading-spinner">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Save Question</button>
+        </div>
+    </form>
+    <div class="processed-result"></div>
+    <div id="loading-spinner" class="text-center my-3">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+      <script>
+        // HTMX will toggle the 'd-none' class on #loading-spinner automatically
+        document.addEventListener('htmx:configRequest', function(evt) {
+          const indicator = document.querySelector('#loading-spinner');
+          if (indicator) {
+            indicator.classList.remove('d-none'); // Show spinner on request start
+          }
+        });
+    
+        document.addEventListener('htmx:afterRequest', function(evt) {
+          const indicator = document.querySelector('#loading-spinner');
+          if (indicator) {
+            indicator.classList.add('d-none'); // Hide spinner after request
+          }
+        });
+      </script>
+</div>

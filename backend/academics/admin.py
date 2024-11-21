@@ -1,23 +1,27 @@
 from typing import Any
 from django.contrib import admin
 from django.db.models.query import QuerySet
-from django.http import HttpResponseRedirect
 from django.urls import path
-from django.shortcuts import render
 from django.contrib import messages
 from django.shortcuts import redirect
-from users.models import StudentGroup
+from users.models import StudentGroup, Student
 from quiz.models import Quiz
-from .models import AcademicYear, Major, Course, Syllabus
-from core.constants import YearLevel
+from .models import AcademicYear, Major, Course, CourseAssignment, GradeType, Grade, GradeDetail
+from core.constants import YearLevel, AcademicYearStatus
 from icecream import ic
+from django.forms.models import BaseInlineFormSet
+from django.core.exceptions import ValidationError
+from django.db.models import Sum
+from core.constants import GradeStatus
+from .services import aggregate_course_grades
+
 
 
 @admin.register(AcademicYear)
 class AcademicYearAdmin(admin.ModelAdmin):
     list_display = ("start_year", "end_year", "status", "current_semester")
     change_list_template = "admin/academics/academic_year/change_list.html"
-
+    # exclude = ['status',]
     def finish_current_year_view(self, request):
         # Only fetch the current year instance to finish
         try:
@@ -44,11 +48,87 @@ class AcademicYearAdmin(admin.ModelAdmin):
 class MajorAdmin(admin.ModelAdmin):
     list_display = ("name", "duration_years")
 
+class CourseAssignmentInline(admin.TabularInline):
+    model = CourseAssignment
+    extra = 1
+    
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        if db_field.name == "student_group":
+            # Check if a Course object is available in the request (this happens on edit pages)
+            course = getattr(request, "_course_obj", None)
+            if course:
+                # Filter student groups based on the course's year_level and major
+                kwargs["queryset"] = StudentGroup.objects.filter(
+                    year_level=course.year_level,
+                    major=course.major
+                )
+            else:
+                # Return an empty queryset initially
+                kwargs["queryset"] = StudentGroup.objects.none()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
+
+class GradeTypeInlineModelFormSet(BaseInlineFormSet):
+    def clean(self):
+        super().clean()
+        
+        total_score = 0
+        for form in self.forms:
+            if not form.cleaned_data.get('DELETE', False):
+                score = form.cleaned_data.get('max_score', 0)  # Assuming `score` is a field in InlineModel
+                total_score += score
+        
+        # Access the max_score from the instance of the main model
+        max_score = self.instance.max_score  # Assuming `max_score` is a field in MainModel
+
+        if ic(total_score != max_score):
+            raise ValidationError(f"The total score of all items must equal {max_score}.")
+
+
+class GradeTypeInline(admin.TabularInline):
+    model = GradeType
+    formset = GradeTypeInlineModelFormSet
+    extra = 1
+
+    
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ("name",)
+    list_display = ("name", 'major', 'year_level')
+    list_filter = ['major', 'year_level']
+    search_fields = ['name']
+    
+    actions = ['aggregate_course_result']
+    inlines = [
+        CourseAssignmentInline,
+        GradeTypeInline,
+    ]
+    
+    def get_form(self, request, obj=None, **kwargs):
+        # Attach the current Course object to the request
+        request._course_obj = obj
+        return super().get_form(request, obj, **kwargs)
+    
+    def aggregate_course_result(self, request, queryset):
+        for course in (courses:=queryset):
+            aggregate_course_grades(courses=course)
+            self.message_user(request, f"Aggregate course result for {course.name} completed successfully.")
+            
+        return redirect(".")
+            
+            
 
+    aggregate_course_result.short_description = "Aggregate Course Result"
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "aggregate-course-result/",
+                self.admin_site.admin_view(self.aggregate_course_result),
+                name="aggregate_course_result",
+            ),
+        ]
+        return custom_urls + urls
 
 class YearLevelFilter(admin.SimpleListFilter):
     title = "Year Level"
@@ -63,8 +143,10 @@ class YearLevelFilter(admin.SimpleListFilter):
         return queryset
 
 
-@admin.register(Syllabus)
-class SyllabusAdmin(admin.ModelAdmin):
+
+
+@admin.register(CourseAssignment)
+class CourseAssignmentAdmin(admin.ModelAdmin):
     """Admin View for Syllabus"""
     exclude = [
         "created_at",
@@ -75,44 +157,19 @@ class SyllabusAdmin(admin.ModelAdmin):
         "student_group",
         "course",
         "teacher",
-        "academic_year",
-        "semester",
     )
     list_filter = [
         "student_group__major",
         "course",
         "student_group__year_level",
-        "academic_year",
         "teacher",
     ]
     actions = ["duplicate_syllabus_for_new_year", "create_quizzes_for_syllabus"]
     list_per_page = 10
 
-    def get_changelist_instance(self, request):
-        # Modify request.GET to set a default filter value
-        if "academic_year__id__exact" not in request.GET:
-            # Set the default filter to a specific category ID, e.g., category id 1
-            default_filters = {
-                "academic_year__id__exact": str(
-                    ic(AcademicYear.objects.get_current_year().id)
-                )
-            }
-            request.GET = request.GET.copy()
-            request.GET.update(default_filters)
 
-        return super().get_changelist_instance(request)
 
-    def duplicate_syllabus_for_new_year(self, request, queryset):
-
-        for syllabus in queryset:
-            Syllabus.objects.copy_syllabus_to_upcoming_year(syllabus.id)
-
-        self.message_user(request, "Syllabus duplicated for the new year.")
-        return HttpResponseRedirect(request.get_full_path())
-
-    duplicate_syllabus_for_new_year.short_description = (
-        "Duplicate Syllabus for New Year"
-    )
+    
 
     def create_quizzes_for_syllabus(self, request, queryset):
         syllabuses_ids = queryset.values_list("id", flat=True)
@@ -121,5 +178,25 @@ class SyllabusAdmin(admin.ModelAdmin):
     create_quizzes_for_syllabus.short_description = (
         "Create Quizzes for Selected Syllabuses"
     )
-    
-    
+
+
+class GradeDetailFormSet(BaseInlineFormSet):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.can_delete = False
+        self.extra=0
+
+class GradeDetailInline(admin.TabularInline):
+    model = GradeDetail
+    formset = GradeDetailFormSet
+    readonly_fields =  ('type',)
+    exclude = ('max_score',)
+
+@admin.register(Grade)
+class GradeAdmin(admin.ModelAdmin):
+    list_display = ( 'student', "course","score")
+    list_filter = ['course',]
+    search_fields = ('student',)
+    inlines = [
+        GradeDetailInline,
+    ]
